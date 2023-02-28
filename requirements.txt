@@ -1,2 +1,1 @@
 fastapi==0.70.0
-neomodel=4.0.10
