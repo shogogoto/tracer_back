@@ -22,7 +22,7 @@ jobs:
       - name: Install pipenv
         uses: VaultVulp/action-pipenv@v2.0.1
         with:
-          command: pipenv requirements > requirements.txt
+          command: requirements > requirements.txt
 
 
       - name: Push
