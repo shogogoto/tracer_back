@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from . import features as F
+
 
 app = FastAPI()
+app.include_router(F.concept.api.router)
 
 
 @app.get("/")
