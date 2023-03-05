@@ -37,9 +37,8 @@ jobs:
           echo "SPACE_ACCESS_TOKEN=${{ secrets.SPACE_ACCESS_TOKEN }}" >> $GITHUB_ENV
 
       - name: Generate requirements.txt for Space
-        uses: VaultVulp/action-pipenv@v2.0.1
-        with:
-          command: requirements > requirements.txt
+        run: |
+          pipenv requirements > requirements.txt
 
       - name: Push
         shell: script -q -e -c "bash {0}"
