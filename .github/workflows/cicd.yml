@@ -20,7 +20,7 @@ jobs:
           echo "SPACE_ACCESS_TOKEN=${{ secrets.SPACE_ACCESS_TOKEN }}" >> $GITHUB_ENV
 
       - name: Setup pyenv
-        uses: "gabrielfalcao/pyenv-action@v11"
+        uses: "gabrielfalcao/pyenv-action@v13"
         with:
           default: 3.9.16
 
