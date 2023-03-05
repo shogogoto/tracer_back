@@ -24,6 +24,9 @@ jobs:
         with:
           command: requirements > requirements.txt
 
+      - name: Create Neo4j Constainer
+        run: |
+          ls -R
 
       - name: Push
         shell: script -q -e -c "bash {0}"
