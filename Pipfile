@@ -12,6 +12,8 @@ jedi-language-server = "*"
 neovim = "*"
 pynvim = "*"
 uvicorn = "*"
+pytest = "*"
+pytest-watch = "*"
 
 [requires]
 python_version = "3.9"
