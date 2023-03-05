@@ -28,6 +28,11 @@ jobs:
       - name: Test
         run:
           pipenv run test
+        env:
+          NEO4J_PROTOCOL: bolt
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: docker
+          NEO4J_URI: localhost
 
       - name: Setup Space-cli
         shell: bash
