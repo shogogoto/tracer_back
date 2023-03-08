@@ -1,9 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from src import features as F
 
 app = FastAPI()
-app.include_router(F.concept.api.router)
 
+# COR許可
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+app.include_router(F.concept.api.router)
+app.include_router(F.admin.api.router)
 
 @app.get("/")
 def read_root():
