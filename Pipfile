@@ -20,6 +20,7 @@ python_version = "3.9"
 python_full_version = "3.9.16"
 
 [scripts]
-dev = "uvicorn main:app --reload"
+dev  = "uvicorn main:app --reload"
+prod = "uvicorn main:app"
 test = "pytest"
 tw   = "pytest-watch"

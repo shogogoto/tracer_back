@@ -12,5 +12,4 @@ config.DATABASE_URL = "{}://{}:{}@{}".format(
         environ["NEO4J_PASSWORD"],
         environ["NEO4J_URI"],
         )
-
-install_all_labels()
+config.AUTO_INSTALL_LABELS = True
