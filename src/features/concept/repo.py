@@ -8,6 +8,6 @@ from neomodel import (
 
 
 class Concept(StructuredNode):
-    # uid         = UniqueIdProperty()
+    uid         = UniqueIdProperty()
     name        = StringProperty()
     description = StringProperty()
