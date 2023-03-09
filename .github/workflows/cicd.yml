@@ -7,17 +7,43 @@ on:
   workflow_dispatch:
 
 jobs:
-  push-to-space:
+  test-and-push-to-space:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Space shell
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9.16
+
+      - run: |
+          python -m pip install --upgrade pip pipenv
+          pipenv install --dev
+
+      - name: Create Neo4j Constainer
+        run: |
+          docker compose up -d
+
+      - name: Test
+        run:
+          pipenv run test
+        env:
+          NEO4J_PROTOCOL: bolt
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: docker
+          NEO4J_URI: localhost
+
+      - name: Setup Space-cli
         shell: bash
         run: |
           curl -fsSL https://get.deta.dev/space-cli.sh | sh
           echo '/home/runner/.detaspace/bin' >> $GITHUB_PATH
           echo "SPACE_ACCESS_TOKEN=${{ secrets.SPACE_ACCESS_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Generate requirements.txt for Space
+        run: |
+          pipenv requirements > requirements.txt
 
       - name: Push
         shell: script -q -e -c "bash {0}"
