@@ -14,6 +14,7 @@ pynvim = "*"
 uvicorn = "*"
 pytest = "*"
 pytest-watch = "*"
+requests = "*"
 
 [requires]
 python_version = "3.9"
