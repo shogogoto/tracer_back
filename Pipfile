@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 fastapi = "==0.70.0"
 neomodel = "*"
+networkx = "*"
 
 [dev-packages]
 jedi-language-server = "*"
