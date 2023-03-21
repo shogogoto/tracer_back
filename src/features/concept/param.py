@@ -2,7 +2,7 @@ from __future__ import annotations
 from pydantic import BaseModel
 from typing import Optional
 from neomodel import StructuredNode
-from ..repo import Concept
+from .repo import Concept
 
 
 class Item(BaseModel):
