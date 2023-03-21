@@ -22,8 +22,8 @@ jobs:
           pipenv install --dev
 
       - name: Create Neo4j Constainer
-      	uses: satackey/action-docker-layer-caching@v0.0.11
-	continue-on-error: true
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
         run: |
           docker compose up -d
 
