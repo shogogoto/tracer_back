@@ -14,3 +14,10 @@ class Item(BaseModel):
                 name=self.name,
                 description=self.description
                 )
+
+    @classmethod
+    def create(cls,
+            name:str,
+            description:str = None
+        )->Item:
+        return cls(name=name, description=description)
