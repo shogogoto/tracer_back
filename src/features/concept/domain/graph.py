@@ -1,68 +1,51 @@
+from __future__ import annotations
+
 import networkx as nx
-from ..param import Item
-from typing import Optional, Union
-from ..repo import Concept
-from dataclasses import dataclass
-from uuid import uuid4
+from .node import ConceptNode
+from dataclasses import dataclass, InitVar
 
 
+# 3段グラフ
 @dataclass(frozen=True)
-class ConceptNode:
-    uid: Optional[str]
-    name: str
-    description: Optional[str]
-    id: Optional[int] = None
+class TripletGraph:
+    # dests: list[ConceptNode]
+    center:ConceptNode
+    __G: nx.DiGraph = nx.DiGraph()
+    srcs: InitVar[list[ConceptNode]] = []
+    dests: InitVar[list[ConceptNode]] = []
 
-    @classmethod
-    def create(cls, data:Union[Item,Concept]):
-        if isinstance(data, Item):
-            return cls(uid=None, name=data.name, description=data.description)
-        elif isinstance(data, Concept):
-            return cls(
-                uid=data.uid,
-                name=data.name,
-                description=data.description,
-                id=getattr(data, "id", None)
-                )
-        else:
-            raise TypeError()
+    def __post_init__(self, srcs, dests):
+        c = self.center
+        self.__G.add_node(c.uid, node=c.value)
+        self.__add_sources(srcs)
+        self.__add_destinations(dests)
 
-    # DB上に存在するか
-    def exists(self)->bool:
-        return self.id is not None
+    def __add_sources(self, sources):
+        c = self.center
+        for s in sources:
+            self.__G.add_node(s.uid, node=s.value)
+            self.__G.add_edge(s.uid, c.uid)
 
-    def json(self) -> dict:
-        return {
-            uid: self.uid,
-            name: self.name,
-            description: self.description
-        }
-
-    def model(self) -> Concept:
-        pass
-
-# 複数ノードを一括で作成するのに便利なツールを作りたい
-class ConceptGraph:
-    def __init__(self, data:Union[Item,Concept], uid:str=None):
-        self._G = nx.DiGraph()
-        self._uid = uuid4()
-        self._G.add_node((self._uid, ConceptNode.create(data)))
-
-    def add_sources(self, srcs:list[Union[Item,Concept]]):
-        self._G.add_edges_from([((uuid4(), ConceptNode.create(s)), self._uid) for s in srcs])
-        pass
-
-    def add_distinations(self, dists:list[Union[Item,Concept]]):
-        pass
-
-    def sources(self, depth:int=1):
-        # self._G.ed
-        pass
-
-
-    def save(self):
-        pass
+    def __add_destinations(self, destinations):
+        c = self.center
+        for d in destinations:
+            self.__G.add_node(d.uid, node=d.value)
+            self.__G.add_edge(c.uid, d.uid)
 
     @property
-    def uid(self)->str:
-        return str(self._uid)
+    def sources(self)->list[ConceptNode]:
+        uid = self.center.uid
+        src_uids = list(self.__G.predecessors(uid))
+        return [
+            self.__G.nodes[suid]["node"]
+            for suid in src_uids
+        ]
+
+    @property
+    def destinations(self)->list[ConceptNode]:
+        uid = self.center.uid
+        dest_uids = list(self.__G.successors(uid))
+        return [
+            self.__G.nodes[duid]["node"]
+            for duid in dest_uids
+        ]

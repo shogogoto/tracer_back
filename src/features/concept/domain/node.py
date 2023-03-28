@@ -25,10 +25,13 @@ class ConceptNode:
             name_descriptions:list[tuple(str,str)]
         )->list[ConcepNode]:
         return [
-                cls.of(Concept(name=n, description=d))
+                cls.create(name=n, description=d)
                 for n, d in name_descriptions
                ]
 
+    @classmethod
+    def create(cls, name:str, description:str=None)->ConceptNode:
+        return cls.of(Concept(name=name, description=description))
 
     def __eq__(self, other):
         sv = self.value
