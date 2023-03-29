@@ -1,7 +1,7 @@
 version: '3'
 services:
     neo4j:
-        image: neo4j:4.4.4
+        image: neo4j:5.6
         container_name: graph_db
         ports:
             - 7474:7474 # GIU
@@ -14,4 +14,4 @@ services:
             - ./.docker/neo4j/logs:/logs
             - ./.docker/neo4j/conf:/conf
         environment:
-            - NEO4J_AUTH=neo4j/docker
+            - NEO4J_AUTH=neo4j/docker_neo4j_test
