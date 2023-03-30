@@ -1,21 +1,22 @@
 from __future__ import annotations
-from typing import TypeVar, Generic, Hashable
+from typing import Hashable
 from dataclasses import dataclass, InitVar
-from uuid import uuid4
 
-from neomodel import StructuredNode, db
+from neomodel import StructuredNode
 import networkx as nx
-from . import Concept
+
 
 @dataclass(frozen=False)
 class NeoDiGraph:
+    # StructuredNodeではなく、
+    #  uidをもつことを保証するBaseNodeを定義すべきか
     label:StructuredNode
-    __G:nx.DiGraph = nx.DiGraph()
+    G:nx.DiGraph = nx.DiGraph()
 
     def add_node(self, **kwargs)->Hashable:
         l = self.label(**kwargs).save()
-        self.__G.add_node(l.id, node=l)
-        return l.id # uidは全てのlabelが持つ
+        self.G.add_node(l.uid, node=l)
+        return l.uid # uidは全てのlabelが持つ
 
     def add_edge(self,
             n_start:Hashable,
@@ -23,6 +24,7 @@ class NeoDiGraph:
             ):
             s = self[n_start]
             e = self[n_end]
+            self.G.add_edge(n_start, n_end)
             s.dests.connect(e)
 
     def add_source(self, n:Hashable, **kwargs)->Hashable:
@@ -37,23 +39,25 @@ class NeoDiGraph:
 
 
     def __getitem__(self, n)->StructuredNode:
-        return self.__G.nodes[n]["node"]
+        return self.G.nodes[n]["node"]
 
     @classmethod
     def of(cls,
            label:StructuredNode,
            g:nx.DiGraph
-        )->NeoDiGraph:
+        )->tuple[NeoDiGraph,dict[Hashable,Hashable]]:
         self = cls(label)
 
         models = label.create_or_update(
-            *[g.nodes[n] for n in g.nodes])
+            *[g.nodes[n] for n in g.nodes]
+        )
+
         n_map = {
-            n: models[i].id
+            n: models[i].uid
             for i, n in enumerate(g.nodes)
         }
         for m in models:
-            self.__G.add_node(m.id, node=m)
+            self.G.add_node(m.uid, node=m)
 
         for n_start, n_end in g.edges:
             s = n_map[n_start]

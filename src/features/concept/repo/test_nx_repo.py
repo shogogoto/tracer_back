@@ -30,32 +30,37 @@ def test_nx_digraph_wapped():
     assert g[k2] == g[k1].dests.get()
 
 
-def test_generate():
-    g = ND(Concept)
-    c1 = g.add_node(name="1th")
-    ss0 = [g.add_source     (c1, name=f"s0{i}") for i in range(5)]
-    ds0 = [g.add_destination(c1, name=f"d0{i}") for i in range(4)]
-    c2 = ds0[0]
-    ss1 = [g.add_source     (c2, name=f"s1{i}") for i in range(5)]
-    ds1 = [g.add_destination(c2, name=f"d1{i}") for i in range(3)]
+def test_search_source():
+    # g = ND(Concept)
+    # c1 = g.add_node(name="1th")
+    # ss0 = [g.add_source     (c1, name=f"s0{i}") for i in range(5)]
+    # ds0 = [g.add_destination(c1, name=f"d0{i}") for i in range(4)]
+    # c2 = ds0[0]
+    # ss1 = [g.add_source     (c2, name=f"s1{i}") for i in range(5)]
+    # ds1 = [g.add_destination(c2, name=f"d1{i}") for i in range(3)]
 
-    c3 = ds1[0]
-    ss2 = [g.add_source     (c3, name=f"s2{i}") for i in range(5)]
-    ds2 = [g.add_destination(c3, name=f"d2{i}") for i in range(3)]
+    # c3 = ds1[0]
+    # ss2 = [g.add_source     (c3, name=f"s2{i}") for i in range(5)]
+    # ds2 = [g.add_destination(c3, name=f"d2{i}") for i in range(3)]
 
+    # c4 = ds2[0]
+    # ss3 = [g.add_source     (c4, name=f"s3{i}") for i in range(5)]
+    # ds2 = [g.add_destination(c4, name=f"d3{i}") for i in range(3)]
 
-    c4 = ds2[0]
-    ss3 = [g.add_source     (c4, name=f"s3{i}") for i in range(5)]
-    ds2 = [g.add_destination(c4, name=f"d3{i}") for i in range(3)]
-
-    tree1 = nx.balanced_tree(3, 3, nx.DiGraph())
-    print(tree1.nodes)
-    tree2 = nx.balanced_tree(3, 3, nx.DiGraph())
-    print(tree1.nodes)
-    tree = nx.compose(tree1, tree2)
-    # tree = nx.barbell_graph(5, 3, nx.DiGraph())
-    print(tree.nodes)
+    tree = nx.balanced_tree(3, 3, nx.DiGraph())
     nx.set_node_attributes(tree, name="name", values={ n: f"name{n}" for n in tree.nodes})
-    g2 = ND.of(Concept, tree)
-    # print(tree.nodes)
-    # print(tree.edges)
+    g, n_map = ND.of(Concept, tree)
+    # rtree = nx.reverse(tree)
+    # h, m2 = ND.of(Concept, rtree)
+    # root_id = tree[n_map[0]]
+    root = g[n_map[0]]
+    print(root)
+    print(n_map)
+
+    # print(set(g.G.successors(root.id)))
+    # print(g.G.successors(root.id))
+    # uniq = Q.UniqIdMatcher(Concept, root.uid)
+    # print(uniq)
+    # sq = Q.SourceConfig(min_dist=1, max_dist=1)
+    # dq = Q.DestinationConfig(min_dist=1, max_dist=2)
+    # g.G.predecessors(n)
