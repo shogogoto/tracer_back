@@ -64,8 +64,3 @@ jobs:
         run: |
           space link --id "${{ secrets.SPACE_PROJECT_ID }}"
           space push
-
-      - name: Release
-        shell: script -q -e -c "bash {0}"
-        run: |
-          space release --id "${{ secrets.SPACE_PROJECT_ID }}" --confirm
