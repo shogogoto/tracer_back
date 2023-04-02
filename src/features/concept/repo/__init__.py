@@ -25,19 +25,3 @@ class Concept(StructuredNode):
     srcs        = RelationshipFrom("Concept", REL_TYPE)
     dests       = RelationshipTo("Concept", REL_TYPE)
 
-    @classmethod
-    def complex(cls, g):
-        query = """
-        MATCH (src:Concept) -[from:INFER]-> (n:Concept) -[to:INFER]-> (dist:Concept)
-
-
-
-        RETURN n
-        """
-        results, meta = db.cypher_query(query)
-
-        print("###################### META")
-        print(meta)
-        print("###################### META")
-        print(results)
-        pass

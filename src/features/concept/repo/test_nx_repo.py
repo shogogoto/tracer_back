@@ -1,7 +1,12 @@
+import pytest
 from .nx_repo import NeoDiGraph as ND
 from . import Concept
 
 import networkx as nx
+
+from . import statistics_query as Q
+from functools import reduce
+
 
 # テスト用グラフ作成ユーティリティ
 def test_create_graph():
@@ -17,7 +22,6 @@ def test_create_graph():
     c2 = Concept.nodes.first(name="nx2")
     assert c1
     assert c2 == c1.dests.get()
-    print(c1.dests.get())
 
 def test_nx_digraph_wapped():
     g = ND(Concept)
@@ -30,36 +34,68 @@ def test_nx_digraph_wapped():
     assert g[k2] == g[k1].dests.get()
 
 
-def test_search_source():
-    # g = ND(Concept)
-    # c1 = g.add_node(name="1th")
-    # ss0 = [g.add_source     (c1, name=f"s0{i}") for i in range(5)]
-    # ds0 = [g.add_destination(c1, name=f"d0{i}") for i in range(4)]
-    # c2 = ds0[0]
-    # ss1 = [g.add_source     (c2, name=f"s1{i}") for i in range(5)]
-    # ds1 = [g.add_destination(c2, name=f"d1{i}") for i in range(3)]
-
-    # c3 = ds1[0]
-    # ss2 = [g.add_source     (c3, name=f"s2{i}") for i in range(5)]
-    # ds2 = [g.add_destination(c3, name=f"d2{i}") for i in range(3)]
-
-    # c4 = ds2[0]
-    # ss3 = [g.add_source     (c4, name=f"s3{i}") for i in range(5)]
-    # ds2 = [g.add_destination(c4, name=f"d3{i}") for i in range(3)]
-
-    tree = nx.balanced_tree(3, 3, nx.DiGraph())
-    nx.set_node_attributes(tree, name="name", values={ n: f"name{n}" for n in tree.nodes})
+# 1階、2階、3階の関係元を取得
+def test_find_source():
+    tree = nx.balanced_tree(2, 3, nx.DiGraph())
+    tree = nx.reverse(tree)
+    nx.set_node_attributes(tree, name="name",
+        values={ n: f"test_source{n}" for n in tree.nodes})
     g, n_map = ND.of(Concept, tree)
-    # rtree = nx.reverse(tree)
-    # h, m2 = ND.of(Concept, rtree)
-    # root_id = tree[n_map[0]]
-    root = g[n_map[0]]
-    print(root)
-    print(n_map)
+    leaf = g[n_map[0]]
+    pred1 = set(g.G.predecessors(leaf.uid))
+    pred2 = reduce(set.union, [set(g.G.predecessors(n)) for n in pred1])
+    pred3 = reduce(set.union, [set(g.G.predecessors(n)) for n in pred2])
 
-    # print(set(g.G.successors(root.id)))
+    result1 = Q.RelationRepo.find_source(leaf.uid, 1, 1)
+    result2 = Q.RelationRepo.find_source(leaf.uid, 2, 2)
+    result3 = Q.RelationRepo.find_source(leaf.uid, 3, 3)
+    result23 = Q.RelationRepo.find_source(leaf.uid, 2, 3)
+
+    assert pred1 == result1.uids
+    assert pred2 == result2.uids
+    assert pred3 == result3.uids
+    assert pred2.union(pred3) == result23.uids
+
+    # with pytest.raises(Exception) as e:
+    #     Q.RelationRepo.find(root.uid, 3, 2)
+
+# 1階、2階、3階の関係先を取得
+def test_find_destinations():
+    tree = nx.balanced_tree(2, 3, nx.DiGraph())
+    nx.set_node_attributes(tree, name="name",
+        values={ n: f"test_dest{n}" for n in tree.nodes})
+    g, n_map = ND.of(Concept, tree)
+    root = g[n_map[0]]
+    succ1 = set(g.G.successors(root.uid))
+    succ2 = reduce(set.union, [set(g.G.successors(n)) for n in succ1])
+    succ3 = reduce(set.union, [set(g.G.successors(n)) for n in succ2])
+
+    result1 = Q.RelationRepo.find_dest(root.uid, 1, 1)
+    result2 = Q.RelationRepo.find_dest(root.uid, 2, 2)
+    result3 = Q.RelationRepo.find_dest(root.uid, 3, 3)
+    result23 = Q.RelationRepo.find_dest(root.uid, 2, 3)
+
+    assert succ1 == result1.uids
+    assert succ2 == result2.uids
+    assert succ3 == result3.uids
+    assert succ2.union(succ3) == result23.uids
+
+
+
+
+    # print(root)
+    # print(n_map)
     # print(g.G.successors(root.id))
-    # uniq = Q.UniqIdMatcher(Concept, root.uid)
+    # um = Q.UniqIdMatcher(Concept, root.uid)
+    # pm = Q.PathMatcher(Concept, "srcs")
+    # pc = Q.PathCounter(pm)
+    # print(um.build())
+    # print("##############################")
+    # q = Q.Query([um]) # 可変長のコンストラクタ引数渡せるようにしたい
+    # print(q.build())
+    # print(q())
+    # print(q)
+    # assert root == Q.Query(um)()
     # print(uniq)
     # sq = Q.SourceConfig(min_dist=1, max_dist=1)
     # dq = Q.DestinationConfig(min_dist=1, max_dist=2)
