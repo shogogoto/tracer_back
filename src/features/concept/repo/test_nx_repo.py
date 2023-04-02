@@ -81,24 +81,3 @@ def test_find_destinations():
     assert succ2 == result2.uids
     assert succ3 == result3.uids
     assert succ2.union(succ3) == result23.uids
-
-
-
-
-    # print(root)
-    # print(n_map)
-    # print(g.G.successors(root.id))
-    # um = Q.UniqIdMatcher(Concept, root.uid)
-    # pm = Q.PathMatcher(Concept, "srcs")
-    # pc = Q.PathCounter(pm)
-    # print(um.build())
-    # print("##############################")
-    # q = Q.Query([um]) # 可変長のコンストラクタ引数渡せるようにしたい
-    # print(q.build())
-    # print(q())
-    # print(q)
-    # assert root == Q.Query(um)()
-    # print(uniq)
-    # sq = Q.SourceConfig(min_dist=1, max_dist=1)
-    # dq = Q.DestinationConfig(min_dist=1, max_dist=2)
-    # g.G.predecessors(n)

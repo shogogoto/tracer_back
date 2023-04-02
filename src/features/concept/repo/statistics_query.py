@@ -3,44 +3,67 @@ from neomodel import (
         StructuredNode
         , StructuredRel
         , db
+        , RelationshipDefinition
         )
 from typing import Union, Optional, Callable, Hashable
 from abc import ABC, abstractmethod
 from . import Concept
 
-# class CypherBuilder(ABC):
-#     @abstractmethod
-#     def build(self)->str:
-#         pass
 
-# @dataclass(frozen=True)
-# class UniqIdMatcher(CypherBuilder):
-#     label:StructuredNode
-#     uid:Hashable
-#     var:str = "n"
+class CypherText(ABC):
+    @abstractmethod
+    def build(self)->str:
+        pass
 
-#     def build(self)->str:
-#         labs = ":".join(self.label.inherited_labels())
-#         return f"MATCH ({self.var}:{labs})" \
-#                 f" WHERE {self.var}.uid = '{self.uid}''"
-
-# @dataclass(frozen=True)
-# class PathMatcher:
-#     label:StructuredNode
-#     source_var:str
-#     min_dist:int = 1
-#     max_dist:int = 1
-#     var_name:str = "p"
-#     pass
+    @property
+    def text(self)->str:
+        return self.build()
 
 
-#     def cypher(self)->str:
+@dataclass(frozen=True)
+class UniqIdNode(CypherText):
+    label:StructuredNode
+    uid:Hashable
+    var:str = "target"
 
-#         srcs = getattr(Concept, "src2s")
-#         print(srcs)
-#         print(getattr(srcs, "definition"))
-#         pass
+    def build(self)->str:
+        labs = ":".join(self.label.inherited_labels())
+        v    = self.var
+        return f"({v}:{labs}) WHERE {v}.uid = '{self.uid}'"
 
+
+@dataclass(frozen=True)
+class Path(CypherText):
+    rel:RelationshipDefinition
+    min_dist:int
+    max_dist:int
+    source:str
+    var:str = "p"
+
+    def build(self)->str:
+        rel_def = self.rel.definition
+        t = rel_def["relation_type"]
+        labels = rel_def["node_class"].inherited_labels()
+        ls = ":".join(labels)
+        s = self.source
+        arrow = f"-[rel:{t}*{self.min_dist}..{self.max_dist}]->"
+        if self.direction == 1:
+            return f"{self.var} = ({s}){arrow}(dest:{ls})"
+        elif self.direction == -1:
+            return f"{self.var} = (src:{ls}){arrow}({s})"
+        else:
+            raise ValueError("なんかdirectionは±1以外にもあるらしい")
+
+    @property
+    def direction(self)->int:
+        return self.rel.definition["direction"]
+
+    @property
+    def result_index(self)->int:
+        if self.direction == 1:
+            return -1
+        else:
+            return 0
 
 
 # # 関係(edge)の統計情報
@@ -49,24 +72,29 @@ from . import Concept
 #     pass
 
 
-# @dataclass(frozen=True)
-# class Query(Callable,CypherBuilder):
-#     builders:list[CypherBuilder]
+@dataclass(frozen=True)
+class RelationRepo:
+    label:StructuredNode
+    relation:str
 
+    def find(self, uid:str, min_dist=1, max_dist=1):
+        uniq = UniqIdNode(self.label, uid)
+        rel = getattr(self.label, self.relation)
+        p = Path(rel, min_dist, max_dist, source=uniq.var)
+        query = f"""
+            MATCH {uniq.text}
+            MATCH {p.text}
+            RETURN nodes({p.var})
+        """
+        # print(query)
+        params = {"uid": uid}
+        results, columns = db.cypher_query(
+                query
+                , params=params
+                , resolve_objects=True)
+        resolved = [r[0][0][p.result_index] for r in results]
+        return Result(resolved, columns)
 
-#     def __call__(self)->list[StructuredNode]:
-#         q = self.build()
-#         results, columns = db.cypher_query(
-#                 q, resolve_objects=True)
-#         print(results)
-
-#         return self.build()
-
-#     def build(self)->str:
-#         print(self.builders[0])
-#         q = " \n".join([b.build() for b in self.builders])
-#         q += f"\n RETURN n"
-#         return q
 
 @dataclass(frozen=True)
 class Result:
@@ -76,65 +104,7 @@ class Result:
     @property
     def uids(self)->set[str]:
         return set([r.uid for r in self.resolved])
-        # labels = [r[0][0][0] for r in self.results]
-        # return set(elm.uid for elm in labels)
 
-
-@dataclass(frozen=True)
-class RelationRepo:
-    label:StructuredNode
-    relation:str
-
-    @property
-    def labels(self)->str:
-        return ":".join(self.label.inherited_labels())
-
-    @property
-    def direction(self)->int:
-        rel = getattr(self.label, self.relation)
-        rel_def:dict = rel.definition
-        return rel_def["direction"]
-
-    @property
-    def type(self)->str:
-        rel = getattr(self.label, self.relation)
-        rel_def:dict = rel.definition
-        return rel_def["relation_type"]
-    
-    @property
-    def result_index(self)->int:
-        if self.direction == 1:
-            return -1
-        else:
-            return 0
-
-    def cypher_path(self, min_dist, max_dist)->str:
-        direct_str = f"-[rel:{self.type}*{min_dist}..{max_dist}]->"
-        if self.direction == 1:
-            return f"p = (target){direct_str}(dest:{self.labels})"
-        elif self.direction == -1:
-            return f"p = (src:{self.labels}){direct_str}(target)"
-        else:
-            raise ValueError("なんかdirectionは±1以外にもあるらしい")
-
-
-    def find(self, uid:str, min_dist=1, max_dist=1):
-        p = self.cypher_path(min_dist, max_dist)
-        query = f"""
-            MATCH (target:{self.labels}) WHERE target.uid = $uid
-            MATCH {p}
-        """ \
-        """
-            RETURN nodes(p) as sources
-        """
-        # print(query)
-        params = {"uid": uid}
-        results, columns = db.cypher_query(
-                query
-                , params=params
-                , resolve_objects=True)
-        resolved = [r[0][0][self.result_index] for r in results]
-        return Result(resolved, columns)
 
     #     query = """
     #         MATCH (start:Concept) WHERE start.uid = $uid
