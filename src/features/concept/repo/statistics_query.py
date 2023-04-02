@@ -79,45 +79,62 @@ class Result:
         # labels = [r[0][0][0] for r in self.results]
         # return set(elm.uid for elm in labels)
 
+
+@dataclass(frozen=True)
 class RelationRepo:
-    @classmethod
-    def find_source(cls, uid:str, min_dist=1, max_dist=1):
+    label:StructuredNode
+    relation:str
+
+    @property
+    def labels(self)->str:
+        return ":".join(self.label.inherited_labels())
+
+    @property
+    def direction(self)->int:
+        rel = getattr(self.label, self.relation)
+        rel_def:dict = rel.definition
+        return rel_def["direction"]
+
+    @property
+    def type(self)->str:
+        rel = getattr(self.label, self.relation)
+        rel_def:dict = rel.definition
+        return rel_def["relation_type"]
+    
+    @property
+    def result_index(self)->int:
+        if self.direction == 1:
+            return -1
+        else:
+            return 0
+
+    def cypher_path(self, min_dist, max_dist)->str:
+        direct_str = f"-[rel:{self.type}*{min_dist}..{max_dist}]->"
+        if self.direction == 1:
+            return f"p = (target){direct_str}(dest:{self.labels})"
+        elif self.direction == -1:
+            return f"p = (src:{self.labels}){direct_str}(target)"
+        else:
+            raise ValueError("なんかdirectionは±1以外にもあるらしい")
+
+
+    def find(self, uid:str, min_dist=1, max_dist=1):
+        p = self.cypher_path(min_dist, max_dist)
         query = f"""
-            MATCH (target:Concept) WHERE target.uid = $uid
-            MATCH p = (src:Concept)-[rel:INFER*{min_dist}..{max_dist}]->(target)
+            MATCH (target:{self.labels}) WHERE target.uid = $uid
+            MATCH {p}
         """ \
         """
             RETURN nodes(p) as sources
         """
+        # print(query)
         params = {"uid": uid}
         results, columns = db.cypher_query(
                 query
                 , params=params
                 , resolve_objects=True)
-        resolved = [r[0][0][0] for r in results]
+        resolved = [r[0][0][self.result_index] for r in results]
         return Result(resolved, columns)
-
-
-    @classmethod
-    def find_dest(cls, uid:str, min_dist=1, max_dist=1):
-        query = f"""
-            MATCH (target:Concept) WHERE target.uid = $uid
-            MATCH p = (target)-[rel:INFER*{min_dist}..{max_dist}]->(dest:Concept)
-        """ \
-        """
-            RETURN nodes(p) as dests
-        """
-        params = {"uid": uid}
-        results, columns = db.cypher_query(
-                query
-                , params=params
-                , resolve_objects=True)
-        for r in results:
-            print(r)
-
-        resolved = [r[0][0][-1] for r in results]
-        return Result(resolved, columns)
-
 
     #     query = """
     #         MATCH (start:Concept) WHERE start.uid = $uid

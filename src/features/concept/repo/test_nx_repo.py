@@ -46,10 +46,11 @@ def test_find_source():
     pred2 = reduce(set.union, [set(g.G.predecessors(n)) for n in pred1])
     pred3 = reduce(set.union, [set(g.G.predecessors(n)) for n in pred2])
 
-    result1 = Q.RelationRepo.find_source(leaf.uid, 1, 1)
-    result2 = Q.RelationRepo.find_source(leaf.uid, 2, 2)
-    result3 = Q.RelationRepo.find_source(leaf.uid, 3, 3)
-    result23 = Q.RelationRepo.find_source(leaf.uid, 2, 3)
+    repo = Q.RelationRepo(Concept, "srcs")
+    result1  = repo.find(leaf.uid, 1, 1)
+    result2  = repo.find(leaf.uid, 2, 2)
+    result3  = repo.find(leaf.uid, 3, 3)
+    result23 = repo.find(leaf.uid, 2, 3)
 
     assert pred1 == result1.uids
     assert pred2 == result2.uids
@@ -70,10 +71,11 @@ def test_find_destinations():
     succ2 = reduce(set.union, [set(g.G.successors(n)) for n in succ1])
     succ3 = reduce(set.union, [set(g.G.successors(n)) for n in succ2])
 
-    result1 = Q.RelationRepo.find_dest(root.uid, 1, 1)
-    result2 = Q.RelationRepo.find_dest(root.uid, 2, 2)
-    result3 = Q.RelationRepo.find_dest(root.uid, 3, 3)
-    result23 = Q.RelationRepo.find_dest(root.uid, 2, 3)
+    repo = Q.RelationRepo(Concept, "dests")
+    result1  = repo.find(root.uid, 1, 1)
+    result2  = repo.find(root.uid, 2, 2)
+    result3  = repo.find(root.uid, 3, 3)
+    result23 = repo.find(root.uid, 2, 3)
 
     assert succ1 == result1.uids
     assert succ2 == result2.uids
