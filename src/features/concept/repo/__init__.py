@@ -7,12 +7,6 @@ from neomodel import (
         db,
         Relationship
         )
-# from .domain import ConceptNode
-# from .domain import TripletGraph
-
-# class InferRel(Relationship):
-#     code = UniqueIdProperty()
-#     pass
 
 
 REL_TYPE: str = "INFER"

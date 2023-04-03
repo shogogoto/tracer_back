@@ -91,49 +91,49 @@ def test_find_destinations(spread_tree):
     assert succ3 == result3.uids
     assert succ2.union(succ3) == result23.uids
 
-# def test_find_roots(narrow_tree):
-#     g, n_map = narrow_tree
-#     leaf = g[n_map[0]]
+def test_find_roots(narrow_tree):
+    g, n_map = narrow_tree
+    leaf = g[n_map[0]]
 
-#     pred1 = list(g.G.predecessors(leaf.uid))[0]
-#     pred2 = list(g.G.predecessors(pred1))[0]
-#     pred3 = list(g.G.predecessors(pred2))[0]
+    pred1 = list(g.G.predecessors(leaf.uid))[0]
+    pred2 = list(g.G.predecessors(pred1))[0]
+    pred3 = list(g.G.predecessors(pred2))[0]
 
-#     repo = Q.RelationRepo(Concept, "srcs")
-#     tips1 = repo.find(leaf.uid, 3)
-#     tips2 = repo.find(pred1, 2)
-#     tips3 = repo.find(pred2, 1)
-#     tips4 = repo.find(pred3, 1)
-#     result1 = repo.find_tips(leaf.uid)
-#     result2 = repo.find_tips(pred1)
-#     result3 = repo.find_tips(pred2)
-#     result4 = repo.find_tips(pred3)
+    repo = Q.RelationRepo(Concept, "srcs")
+    tips1 = repo.find(leaf.uid, 3)
+    tips2 = repo.find(pred1, 2)
+    tips3 = repo.find(pred2, 1)
+    tips4 = repo.find(pred3, 1)
+    result1 = repo.find_tips(leaf.uid)
+    result2 = repo.find_tips(pred1)
+    result3 = repo.find_tips(pred2)
+    result4 = repo.find_tips(pred3)
 
-#     assert tips1.uids == result1.uids
-#     assert tips2.uids == result2.uids
-#     assert tips3.uids == result3.uids
-#     assert tips4.uids == result4.uids
+    assert tips1.uids == result1.uids
+    assert tips2.uids == result2.uids
+    assert tips3.uids == result3.uids
+    assert tips4.uids == result4.uids
 
 
-# def test_find_leaves(spread_tree):
-#     g, n_map = spread_tree
-#     root = g[n_map[0]]
+def test_find_leaves(spread_tree):
+    g, n_map = spread_tree
+    root = g[n_map[0]]
 
-#     succ1 = list(g.G.successors(root.uid))[0]
-#     succ2 = list(g.G.successors(succ1))[0]
-#     succ3 = list(g.G.successors(succ2))[0]
+    succ1 = list(g.G.successors(root.uid))[0]
+    succ2 = list(g.G.successors(succ1))[0]
+    succ3 = list(g.G.successors(succ2))[0]
 
-#     repo = Q.RelationRepo(Concept, "dests")
-#     tips1 = repo.find(root.uid, 3)
-#     tips2 = repo.find(succ1, 2)
-#     tips3 = repo.find(succ2, 1)
-#     tips4 = repo.find(succ3, 1)
-#     result1 = repo.find_tips(root.uid)
-#     result2 = repo.find_tips(succ1)
-#     result3 = repo.find_tips(succ2)
-#     result4 = repo.find_tips(succ3)
+    repo = Q.RelationRepo(Concept, "dests")
+    tips1 = repo.find(root.uid, 3)
+    tips2 = repo.find(succ1, 2)
+    tips3 = repo.find(succ2, 1)
+    tips4 = repo.find(succ3, 1)
+    result1 = repo.find_tips(root.uid)
+    result2 = repo.find_tips(succ1)
+    result3 = repo.find_tips(succ2)
+    result4 = repo.find_tips(succ3)
 
-#     assert tips1.uids == result1.uids
-#     assert tips2.uids == result2.uids
-#     assert tips3.uids == result3.uids
-#     assert tips4.uids == result4.uids
+    assert tips1.uids == result1.uids
+    assert tips2.uids == result2.uids
+    assert tips3.uids == result3.uids
+    assert tips4.uids == result4.uids

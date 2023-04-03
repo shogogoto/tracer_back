@@ -22,10 +22,9 @@ class RelationRepo:
         p = C.Path(rel, minmax_dist, source=uniq.var)
         query = f"""
             MATCH {uniq.text}
-            MATCH {p.text}
-            RETURN nodes({p.var})
+            MATCH p = {p.text}
+            RETURN nodes(p)
         """
-        # print(query)
         results, columns = db.cypher_query(query, resolve_objects=True)
         resolved = [r[0][0][p.result_index] for r in results]
         return Result(resolved, columns)
@@ -34,15 +33,14 @@ class RelationRepo:
         uniq = C.UniqIdNode(self.label, uid)
         rel = getattr(self.label, self.relation)
         p = C.Path(rel, None, source=uniq.var)
-        # tip_path = C.Path(rel, minmax_dist)
+        tip_path = C.Path(rel, minmax_dist=1,
+            source=p.matched, matched=None)
         query = f"""
             MATCH {uniq.text}
             MATCH {p.text}
-            WHERE NOT ()-[:INFER]->(src)
-            RETURN src
+            WHERE NOT {tip_path.text}
+            RETURN {p.matched}
         """
-        print(query)
-        print(p)
         results, columns = db.cypher_query(query, resolve_objects=True)
         return Result([r[0] for r in results], columns)
 

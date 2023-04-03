@@ -33,18 +33,18 @@ class Path(CypherText):
     minmax_dist:Union[Optional[int]
         ,tuple[Optional[int],Optional[int]]]
     source:str = "src"
-    destination:str = "dest"
-    var:str = "p"
-    rel_var:str = "rel"
+    matched:str = "m"
+    rel_var:str = ""
 
     def build(self)->str:
         ls = self.labels
-        s = self.source
+        s = self.source_node
+        m = self.matched_node
         arrow = self.arrow
         if self.direction == 1:
-            return f"{self.var} = ({s}:{ls}){arrow}({self.destination}:{ls})"
+            return f"{s}{arrow}{m}"
         elif self.direction == -1:
-            return f"{self.var} = (src:{ls}){arrow}({s}:{ls})"
+            return f"{m}{arrow}{s}"
         else:
             raise ValueError("なんかdirectionは±1以外にもあるらしい")
 
@@ -53,8 +53,9 @@ class Path(CypherText):
         return f"({self.source}:{self.labels})"
 
     @property
-    def destination_node(self)->str:
-        return f"({self.desination}:{self.labels})"
+    def matched_node(self)->str:
+        if self.matched is None: return "()"
+        return f"({self.matched}:{self.labels})"
 
     @property
     def labels(self)->str:
