@@ -45,6 +45,10 @@ class FromUniqIdToTipsQuery(Query):
             MATCH {self.path.text}
             WHERE NOT {self.tip_path.text}
             RETURN {self.path.matched}
+                //, COUNT
         """
         results, columns = db.cypher_query(query, resolve_objects=True)
+        print(query)
+        for r in results:
+            print(r)
         return Result([r[0] for r in results], columns)

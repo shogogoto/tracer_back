@@ -6,10 +6,9 @@ from typing import Union, Optional
 import types
 
 
-def convert(value:Union[
-        Optional[int]
-        ,tuple[Optional[int],Optional[int]]]
-    )->str:
+MinMaxDistance = Union[Optional[int],tuple[Optional[int],Optional[int]]]
+
+def convert(value:MinMaxDistance)->str:
     if isinstance(value, int):
         return f"{value}"
     elif isinstance(value, tuple) \
@@ -26,12 +25,10 @@ def convert(value:Union[
     raise TypeError(f"arg's type is invalid {types}")
 
 
-
 @dataclass(frozen=True)
 class Path(CypherText):
     rel:RelationshipDefinition
-    minmax_dist:Union[Optional[int]
-        ,tuple[Optional[int],Optional[int]]]
+    minmax_dist:MinMaxDistance
     source:str = "src"
     matched:str = "m"
     rel_var:str = ""
