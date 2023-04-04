@@ -2,7 +2,7 @@ import pytest
 from .nx_repo import NeoDiGraph as ND
 from . import Concept
 import networkx as nx
-from . import statistics_query as Q
+from . import relation_repo as Q
 from functools import reduce, cache
 
 

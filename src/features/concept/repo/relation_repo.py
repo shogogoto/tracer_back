@@ -5,18 +5,20 @@ from neomodel import (
         , db
         )
 from . import cypher as C
-from typing import Union, Optional
+from typing import Union, Optional, Callable
+
 
 @dataclass(frozen=True)
 class RelationRepo:
     label:StructuredNode
     relation:str
+    resolved:bool = True
 
     def find(self,
              uid:str,
              minmax_dist:Union[Optional[int],
                     tuple[Optional[int],Optional[int]]]
-        )->Result:
+        )->C.Result:
         uniq = C.UniqIdNode(self.label, uid)
         rel = getattr(self.label, self.relation)
         p = C.Path(rel, minmax_dist, source=uniq.var)
@@ -25,11 +27,12 @@ class RelationRepo:
             MATCH p = {p.text}
             RETURN nodes(p)
         """
+        print(query)
         results, columns = db.cypher_query(query, resolve_objects=True)
         resolved = [r[0][0][p.result_index] for r in results]
-        return Result(resolved, columns)
+        return C.Result(resolved, columns)
 
-    def find_tips(self, uid:str):
+    def find_tips(self, uid:str)->C.Result:
         uniq = C.UniqIdNode(self.label, uid)
         rel = getattr(self.label, self.relation)
         p = C.Path(rel, None, source=uniq.var)
@@ -41,27 +44,7 @@ class RelationRepo:
             WHERE NOT {tip_path.text}
             RETURN {p.matched}
         """
+        print(query)
         results, columns = db.cypher_query(query, resolve_objects=True)
-        return Result([r[0] for r in results], columns)
+        return C.Result([r[0] for r in results], columns)
 
-
-@dataclass(frozen=True)
-class Result:
-    resolved:list[StructuredNode]
-    params:dict[str]
-
-    @property
-    def uids(self)->set[str]:
-        return set([r.uid for r in self.resolved])
-    @property
-    def names(self)->set[str]:
-        return set([r.name for r in self.resolved])
-
-    #         RETURN
-    #             src
-    #             , COUNT {(src)-[:INFER]->(tmp:Concept)} as cnt_dests
-    #             , COUNT {(src)-[:INFER*2]->(tmp:Concept)} as cnt_dests_ord2
-    #             , length(p) as distance
-    #     """
-    #     results, columns = db.cypher_query(query, params={"uid": uid}, resolve_objects=True)
-    #     # return [Concept.inflate(r[0]) for r in results]
