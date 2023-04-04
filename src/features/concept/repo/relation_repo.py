@@ -10,9 +10,10 @@ from .cypher import query as Q
 from typing import Union, Optional, Callable
 
 
-
 Found = Union[C.Result, Q.Query]
 
+
+# QueryのFactoryでもある
 @dataclass(frozen=True)
 class RelationRepo:
     label:StructuredNode
@@ -26,12 +27,12 @@ class RelationRepo:
         return self.__resolove_and_return(q)
 
     def find_tips(self, uid:str)->Found:
-        uniq     = C.UniqIdNode(self.label, uid)
-        p        = C.Path(self.rel_def, None, source=uniq.var)
-        q = C.query.FromUniqIdToTipsQuery(uniq, p)
+        uniq = C.UniqIdNode(self.label, uid)
+        p    = C.Path(self.rel_def, None, source=uniq.var)
+        q    = C.query.FromUniqIdToTipsQuery(uniq, p)
         return self.__resolove_and_return(q)
 
-    def __resolove_and_return(self, q:C.query.Query)->C.Result:
+    def __resolove_and_return(self, q:Q.Query)->Found:
         if self.resolved:
             return q()
         else:
