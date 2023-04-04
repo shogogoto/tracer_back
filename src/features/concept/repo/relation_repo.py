@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from neomodel import (
         StructuredNode
         , db
+        , RelationshipDefinition
         )
 from . import cypher as C
 from typing import Union, Optional, Callable
@@ -16,35 +17,22 @@ class RelationRepo:
 
     def find(self,
              uid:str,
-             minmax_dist:Union[Optional[int],
-                    tuple[Optional[int],Optional[int]]]
+             minmax_dist:Union[Optional[int],tuple[Optional[int],Optional[int]]]
         )->C.Result:
         uniq = C.UniqIdNode(self.label, uid)
-        rel = getattr(self.label, self.relation)
-        p = C.Path(rel, minmax_dist, source=uniq.var)
-        query = f"""
-            MATCH {uniq.text}
-            MATCH p = {p.text}
-            RETURN nodes(p)
-        """
-        print(query)
-        results, columns = db.cypher_query(query, resolve_objects=True)
-        resolved = [r[0][0][p.result_index] for r in results]
-        return C.Result(resolved, columns)
+        p    = C.Path(self.rel_def, minmax_dist, source=uniq.var)
+        q    = C.query.FromUniqIdQuery(uniq, p)
+        return self.__resolove_and_return(q)
 
     def find_tips(self, uid:str)->C.Result:
-        uniq = C.UniqIdNode(self.label, uid)
-        rel = getattr(self.label, self.relation)
-        p = C.Path(rel, None, source=uniq.var)
-        tip_path = C.Path(rel, minmax_dist=1,
-            source=p.matched, matched=None)
-        query = f"""
-            MATCH {uniq.text}
-            MATCH {p.text}
-            WHERE NOT {tip_path.text}
-            RETURN {p.matched}
-        """
-        print(query)
-        results, columns = db.cypher_query(query, resolve_objects=True)
-        return C.Result([r[0] for r in results], columns)
+        uniq     = C.UniqIdNode(self.label, uid)
+        p        = C.Path(self.rel_def, None, source=uniq.var)
+        q = C.query.FromUniqIdToTipsQuery(uniq, p)
+        return self.__resolove_and_return(q)
 
+    def __resolove_and_return(self, q:C.query.Query)->C.Result:
+        return q() if self.resolved else q
+
+    @property
+    def rel_def(self)->RelationshipDefinition:
+        return getattr(self.label, self.relation)
