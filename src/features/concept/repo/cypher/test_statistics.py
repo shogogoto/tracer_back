@@ -3,10 +3,11 @@ from ..test_nx_repo import spread_tree, narrow_tree
 from . import statistics as S
 from .. import relation_repo as R
 from .. import Concept
-from .path import Path
+from .path import Path, PathArrow
+from .node import NoneNode
 
 # 関係先の数を集計
-def _test_with_count_dists(spread_tree):
+def test_with_count_dists(spread_tree):
     g, n_map = spread_tree
     root     = g[n_map[0]]
     succ1 = list(g.G.successors(root.uid))[0]
@@ -15,16 +16,24 @@ def _test_with_count_dists(spread_tree):
 
     repo    = R.RelationRepo(Concept, "dests", resolved=False)
     q       = repo.find(root.uid, None)
-    p = Path(Concept.dests, minmax_dist=1, source=q.path.matched, matched="n1")
-    counter1 = S.Counter(p, var="dest1")
-    p2 = Path(Concept.dests, minmax_dist=None, source=q.path.matched, matched="n2")
-    counter2 = S.Counter(p2, var="dest_all")
-    p3 = Path(Concept.srcs, minmax_dist=1, source=q.path.matched, matched="n3")
-    counter3 = S.Counter(p3, var="src1")
-    p4 = Path(Concept.srcs, minmax_dist=None, source=q.path.matched, matched="n4")
-    counter4 = S.Counter(p4, var="src_all")
 
-    res = q(counter1, counter2, counter3, counter4)
+    arrow_to_1     = PathArrow(Concept.dests, minmax_dist=1)
+    arrow_to_all   = PathArrow(Concept.dests, minmax_dist=None)
+    arrow_from_1   = PathArrow(Concept.srcs, minmax_dist=1)
+    arrow_from_all = PathArrow(Concept.srcs, minmax_dist=None)
+
+    m = q.path.matched
+    n = NoneNode()
+    p1 = Path(arrow_to_1, m, n)
+    p2 = Path(arrow_to_all, m, n)
+    p3 = Path(arrow_from_1, m, n)
+    p4 = Path(arrow_from_all, m, n)
+
+    c1 = S.Counter(p1, var="dest1")
+    c2 = S.Counter(p2, var="dest_all")
+    c3 = S.Counter(p3, var="src1")
+    c4 = S.Counter(p4, var="src_all")
+    res = q(c1, c2, c3, c4)
 
     _, st1 = res.filter_(uid=succ1)[0]
     _, st2 = res.filter_(uid=succ2)[0]

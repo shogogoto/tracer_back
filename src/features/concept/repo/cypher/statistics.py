@@ -21,12 +21,3 @@ class Counter(Statistics):
     def text(self):
         pstr = self.path.build()
         return f"COUNT {{ {pstr} WHERE true }} as {self.var}"
-
-    #         RETURN
-    #             src
-    #             , COUNT {(src)-[:INFER]->(tmp:Concept)} as cnt_dests
-    #             , COUNT {(src)-[:INFER*2]->(tmp:Concept)} as cnt_dests_ord2
-    #             , length(p) as distance
-    #     """
-    #     results, columns = db.cypher_query(query, params={"uid": uid}, resolve_objects=True)
-    #     # return [Concept.inflate(r[0]) for r in results]

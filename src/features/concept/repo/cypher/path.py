@@ -1,6 +1,6 @@
 from __future__ import annotations
-from neomodel import RelationshipDefinition, StructuredNode
-from dataclasses import dataclass, InitVar, field
+from neomodel import RelationshipDefinition
+from dataclasses import dataclass
 from .text import CypherText
 from .node import Node, NoneNode
 

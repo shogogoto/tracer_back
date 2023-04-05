@@ -6,8 +6,7 @@ from textwrap import dedent
 
 from .result import Result
 from . import UniqIdNode
-from .path import Path, PathArrow, TipPath
-from .node import Node, NoneNode
+from .path import Path
 from .statistics import Statistics
 
 
