@@ -22,4 +22,11 @@ class UniqIdNode(CypherText):
     def build(self)->str:
         labs = ":".join(self.label.inherited_labels())
         v    = self.var
+        n = self.node_str
         return f"({v}:{labs}) WHERE {v}.uid = '{self.uid}'"
+
+    @property
+    def node_str(self)->str:
+        labs = ":".join(self.label.inherited_labels())
+        v    = self.var
+        return f"({v}:{labs})"

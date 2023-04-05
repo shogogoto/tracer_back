@@ -22,13 +22,17 @@ class RelationRepo:
 
     def find(self, uid:str, minmax_dist:C.path.MinMaxDistance)->Found:
         uniq = C.UniqIdNode(self.label, uid)
-        p    = C.Path(self.rel_def, minmax_dist, source=uniq.var)
+        arw  = C.PathArrow(self.rel_def, minmax_dist)
+        m    = C.path.Node(self.label, "matched")
+        p    = C.Path(arw, uniq, m)
         q    = C.query.FromUniqIdQuery(uniq, p)
         return self.__resolove_and_return(q)
 
     def find_tips(self, uid:str)->Found:
         uniq = C.UniqIdNode(self.label, uid)
-        p    = C.Path(self.rel_def, None, source=uniq.var)
+        arw  = C.PathArrow(self.rel_def, None)
+        m    = C.path.Node(self.label, "matched")
+        p    = C.Path(arw, uniq, m)
         q    = C.query.FromUniqIdToTipsQuery(uniq, p)
         return self.__resolove_and_return(q)
 

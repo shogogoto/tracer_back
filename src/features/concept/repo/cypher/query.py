@@ -6,7 +6,7 @@ from textwrap import dedent
 
 from .result import Result
 from . import UniqIdNode
-from .path import Path
+from .path import Path, PathArrow, Node, NoneNode
 from .statistics import Statistics
 
 
@@ -35,8 +35,6 @@ class Query(ABC, Callable):
         results, columns = \
             db.cypher_query(txt, resolve_objects=True)
         stats_info = compose_stats(results, columns, stats)
-        if len(stats) > 0:
-            print(txt)
         return Result(self.to_neomodel(results), columns, stats_info)
 
     @property
@@ -59,14 +57,16 @@ class FromUniqIdQuery(Query):
         return f"""
             MATCH {self.uniq.text}
             MATCH p = {self.path.text}
-            RETURN nodes(p)"""
+            RETURN nodes(p)
+        """
 
 
 @dataclass
 class FromUniqIdToTipsQuery(Query):
     def __post_init__(self):
-        self.tip_path = Path(self.path.rel, minmax_dist=1,
-            source=self.path.matched, matched=None)
+        arrow = PathArrow(self.path.arrow.rel, 1)
+        self.tip_path = Path(arrow,
+            source=self.path.matched, matched=NoneNode())
 
     def to_neomodel(self, results):
         return [r[0] for r in results]
@@ -75,6 +75,6 @@ class FromUniqIdToTipsQuery(Query):
     def text(self)->str:
         return f"""
             MATCH {self.uniq.text}
-            MATCH {self.path.text}
-            WHERE NOT {self.tip_path.text}
-            RETURN {self.path.matched}"""
+            MATCH {self.path.text} WHERE NOT {self.tip_path.text}
+            RETURN {self.path.matched.var}
+        """

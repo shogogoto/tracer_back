@@ -20,7 +20,7 @@ class Counter(Statistics):
     @property
     def text(self):
         pstr = self.path.build()
-        return f"COUNT {{ {pstr} }} as {self.var}"
+        return f"COUNT {{ {pstr} WHERE true }} as {self.var}"
 
     #         RETURN
     #             src

@@ -6,7 +6,7 @@ from .. import Concept
 from .path import Path
 
 # 関係先の数を集計
-def test_with_count_dists(spread_tree):
+def _test_with_count_dists(spread_tree):
     g, n_map = spread_tree
     root     = g[n_map[0]]
     succ1 = list(g.G.successors(root.uid))[0]
