@@ -13,11 +13,24 @@ class Statistics:
 @dataclass(frozen=True)
 class Counter(Statistics):
     path:Path
-    src:str = "src"
-    dest:str = "dest"
-    var:str = "count"
+    column:str
 
     @property
-    def text(self):
+    def text(self)->str:
         pstr = self.path.build()
-        return f"COUNT {{ {pstr} WHERE true }} as {self.var}"
+        return f"COUNT {{ {pstr} }} as {self.column}"
+
+
+@dataclass(frozen=True)
+class MaxDistance(Statistics):
+    path:Path
+    column:str
+
+    @property
+    def text(self)->str:
+        pstr = self.path.build()
+        q = f"""
+            p = {pstr}
+            length(p) as {self.column}
+        """
+        return dedent(q).strip()
