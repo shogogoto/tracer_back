@@ -1,7 +1,8 @@
+from __future__ import annotations
 from neomodel import RelationshipDefinition, StructuredNode
 from dataclasses import dataclass, InitVar, field
 from .text import CypherText
-from .node import Node
+from .node import Node, NoneNode
 
 from typing import Union, Optional
 
@@ -26,26 +27,21 @@ def convert(value:MinMaxDistance)->str:
 
 
 @dataclass(frozen=True)
-class PathArrow:
+class PathArrow(CypherText):
     rel:RelationshipDefinition
     minmax_dist:MinMaxDistance
     var:str = ""
+
+    def build(self)->str:
+        _type = self.rel.definition["relation_type"]
+        distances = convert(self.minmax_dist)
+        return f"-[{self.var}:{_type}*{distances}]->"
 
     @property
     def labels(self)->str:
         return ":".join(
             self.rel.definition["node_class"]
             .inherited_labels())
-
-    def node_str(var:Optional[str])->str:
-        if var is None: return "()"
-        return f"({var}:{self.labels})"
-
-    @property
-    def arrow(self)->str:
-        _type = self.rel.definition["relation_type"]
-        distances = convert(self.minmax_dist)
-        return f"-[{self.var}:{_type}*{distances}]->"
 
     # OUTGOING, INCOMING, EITHER = 1, -1, 0
     def is_outgoing(self)->bool:
@@ -61,26 +57,11 @@ class Path(CypherText):
     def build(self)->str:
         s     = self.source.var_str
         m     = self.matched.var_str
-        arrow = self.arrow.arrow
+        arrow = self.arrow.text
         if self.arrow.is_outgoing():
             return f"{s}{arrow}{m}"
         else:
             return f"{m}{arrow}{s}"
-
-    @property
-    def source_node(self)->str:
-        return f"({self.source}:{self.labels})"
-
-    @property
-    def matched_node(self)->str:
-        if self.matched is None: return "()"
-        return f"({self.matched}:{self.labels})"
-
-    @property
-    def labels(self)->str:
-        return ":".join(
-            self.rel.definition["node_class"]
-            .inherited_labels())
 
     @property
     def result_index(self)->int:
@@ -89,13 +70,17 @@ class Path(CypherText):
         else:
             return 0
 
+    def tip(self)->TipPath:
+        return TipPath(self)
+
 
 @dataclass(frozen=True)
 class TipPath(CypherText):
-    rel:RelationshipDefinition
-    minmax_dist:MinMaxDistance
-    source:str = "src"
-    matched:str = "m"
-    rel_var:str = ""
+    source_path:Path
 
-    pass
+    def build(self)->str:
+        sp    = self.source_path
+        arrow = PathArrow(sp.arrow.rel, 1)
+        n     = NoneNode()
+        p     = Path(arrow, sp.matched, n)
+        return f"{sp.text} WHERE NOT {p.text}"
