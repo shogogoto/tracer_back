@@ -2,6 +2,7 @@ from typing import Callable
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from neomodel import db
+from textwrap import dedent
 
 from .result import Result
 from . import UniqIdNode
@@ -9,15 +10,34 @@ from .path import Path
 from .statistics import Statistics
 
 
+@dataclass
+class Statistics:
+    pass
+
+
+
+def compose_stats(results, columns, statistics):
+    col_idxs = [(s.var, columns.index(s.var)) for s in statistics]
+    return [
+        {n: r[i] for n, i in col_idxs}
+        for r in results
+    ]
 
 @dataclass
 class Query(ABC, Callable):
     uniq:UniqIdNode
     path:Path
 
-    def __call__(self, stats:Statistics = None)->Result:
-        results, columns = db.cypher_query(self.text, resolve_objects=True)
-        return self.resolve(results, columns)
+    def __call__(self, *stats:Statistics)->Result:
+        txt = dedent(self.text)
+        txt = "\n ,".join([txt] + [s.text for s in stats])
+        txt = txt.strip()
+        results, columns = \
+            db.cypher_query(txt, resolve_objects=True)
+        stats_info = compose_stats(results, columns, stats)
+        if len(stats) > 0:
+            print(txt)
+        return Result(self.to_neomodel(results), columns, stats_info)
 
     @property
     @abstractmethod
@@ -25,24 +45,21 @@ class Query(ABC, Callable):
         pass
 
     @abstractmethod
-    def resolve(self, results, columns)->Result:
+    def to_neomodel(self, results):
         pass
 
 
 @dataclass
 class FromUniqIdQuery(Query):
-    def resolve(self, results, columns)->Result:
-        return Result(
-            [r[0][0][self.path.result_index] for r in results]
-            , columns)
+    def to_neomodel(self, results):
+        return [r[0][0][self.path.result_index] for r in results]
 
     @property
     def text(self)->str:
         return f"""
             MATCH {self.uniq.text}
             MATCH p = {self.path.text}
-            RETURN nodes(p)
-        """
+            RETURN nodes(p)"""
 
 
 @dataclass
@@ -51,8 +68,8 @@ class FromUniqIdToTipsQuery(Query):
         self.tip_path = Path(self.path.rel, minmax_dist=1,
             source=self.path.matched, matched=None)
 
-    def resolve(self, results, columns):
-        return Result([r[0] for r in results], columns)
+    def to_neomodel(self, results):
+        return [r[0] for r in results]
 
     @property
     def text(self)->str:
@@ -60,6 +77,4 @@ class FromUniqIdToTipsQuery(Query):
             MATCH {self.uniq.text}
             MATCH {self.path.text}
             WHERE NOT {self.tip_path.text}
-            RETURN {self.path.matched}
-                //, COUNT
-        """
+            RETURN {self.path.matched}"""
