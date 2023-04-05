@@ -1,9 +1,9 @@
 from neomodel import RelationshipDefinition, StructuredNode
 from dataclasses import dataclass, InitVar, field
 from .text import CypherText
-from enum import Enum, auto
+from .node import Node
+
 from typing import Union, Optional
-import types
 
 
 MinMaxDistance = Union[Optional[int],tuple[Optional[int],Optional[int]]]
@@ -51,27 +51,6 @@ class PathArrow:
     def is_outgoing(self)->bool:
         return self.rel.definition["direction"] == 1
 
-@dataclass(frozen=True)
-class Node(CypherText):
-    label:StructuredNode
-    var:str = "n"
-
-    def build(self)->str:
-        return self.node_str
-
-    @property
-    def node_str(self)->str:
-        labs = ":".join(self.label.inherited_labels())
-        return f"({self.var}:{labs})"
-
-@dataclass(frozen=True)
-class NoneNode(CypherText):
-    def build(self)->str:
-        return "()"
-
-    @property
-    def node_str(self)->str:
-        return "()"
 
 @dataclass
 class Path(CypherText):
@@ -80,8 +59,8 @@ class Path(CypherText):
     matched:Node
 
     def build(self)->str:
-        s     = self.source.node_str
-        m     = self.matched.node_str
+        s     = self.source.var_str
+        m     = self.matched.var_str
         arrow = self.arrow.arrow
         if self.arrow.is_outgoing():
             return f"{s}{arrow}{m}"

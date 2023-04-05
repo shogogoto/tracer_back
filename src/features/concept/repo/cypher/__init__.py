@@ -1,4 +1,8 @@
-from .text import UniqIdNode
+from .node import (
+    Node
+    , UniqIdNode
+    , NoneNode
+    )
 from .path import (
     Path
     , PathArrow

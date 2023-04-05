@@ -6,7 +6,8 @@ from textwrap import dedent
 
 from .result import Result
 from . import UniqIdNode
-from .path import Path, PathArrow, Node, NoneNode
+from .path import Path, PathArrow
+from .node import Node, NoneNode
 from .statistics import Statistics
 
 
@@ -66,7 +67,8 @@ class FromUniqIdToTipsQuery(Query):
     def __post_init__(self):
         arrow = PathArrow(self.path.arrow.rel, 1)
         self.tip_path = Path(arrow,
-            source=self.path.matched, matched=NoneNode())
+            source=self.path.matched,
+            matched=NoneNode())
 
     def to_neomodel(self, results):
         return [r[0] for r in results]
