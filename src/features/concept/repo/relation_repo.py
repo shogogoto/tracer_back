@@ -1,46 +1,41 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from neomodel import (
-        StructuredNode
-        , db
-        , RelationshipDefinition
-        )
+from neomodel import StructuredNode, RelationshipDefinition
 from . import cypher as C
-from .cypher import query as Q
-from typing import Union, Optional, Callable
-
-
-Found = Union[C.Result, Q.Query]
+from .cypher import text as T
+from .cypher.path import MinMaxDistance, Path, PathArrow
+from .cypher import Node
+from typing import Union
 
 
 # QueryのFactoryでもある
-@dataclass(frozen=True)
+@dataclass
 class RelationRepo:
     label:StructuredNode
     relation:str
     resolved:bool = True
 
-    def find(self, uid:str, minmax_dist:C.path.MinMaxDistance)->Found:
-        uniq = C.UniqIdNode(self.label, uid)
-        arw  = C.PathArrow(self.rel_def, minmax_dist)
-        m    = C.path.Node(self.label, "matched")
-        p    = C.Path(arw, uniq, m)
-        q    = C.query.FromUniqIdQuery(uniq, p)
-        return self.__resolove_and_return(q)
+    def __post_init__(self):
+        self.target  = C.Node(self.label, "target")
+        self.matched = C.Node(self.label, "matched")
 
-    def find_tips(self, uid:str)->Found:
-        uniq = C.UniqIdNode(self.label, uid)
-        arw  = C.PathArrow(self.rel_def, None)
-        m    = C.path.Node(self.label, "matched")
-        p    = C.Path(arw, uniq, m)
-        q    = C.query.FromUniqIdToTipsQuery(uniq, p)
-        return self.__resolove_and_return(q)
+    def find(self, uid:str, minmax_dist:MinMaxDistance)->Result:
+        p = C.PathArrow(self.rel_def, minmax_dist) \
+             .to_path(self.target, self.matched)
+        return self.__resolver(p, uid)
 
-    def __resolove_and_return(self, q:Q.Query)->Found:
-        if self.resolved:
-            return q()
-        else:
-            return q
+    def find_tips(self, uid:str)->Result:
+        p = C.PathArrow(self.rel_def, None) \
+             .to_path(self.target, self.matched) \
+             .tip()
+        return self.__resolver(p, uid)
+
+    def __resolver(self, path:Path, uid:str)->QueryResolver:
+        s = T.QueryResolver()
+        s.add_matcher(self.target.with_where("uid", uid))
+        s.add_matcher(path.text)
+        s.add_return(self.matched.var)
+        return s() if self.resolved else s
 
     @property
     def rel_def(self)->RelationshipDefinition:

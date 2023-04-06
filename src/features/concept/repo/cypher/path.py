@@ -47,6 +47,9 @@ class PathArrow(CypherText):
     def is_outgoing(self)->bool:
         return self.rel.definition["direction"] == 1
 
+    def to_path(self, source:Node, matched:Node)->Path:
+        return Path(self, source, matched)
+        pass
 
 @dataclass
 class Path(CypherText):
@@ -62,13 +65,6 @@ class Path(CypherText):
             return f"{s}{arrow}{m}"
         else:
             return f"{m}{arrow}{s}"
-
-    @property
-    def result_index(self)->int:
-        if self.arrow.is_outgoing():
-            return -1
-        else:
-            return 0
 
     def tip(self)->TipPath:
         return TipPath(self)

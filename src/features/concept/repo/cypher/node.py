@@ -1,5 +1,5 @@
 from .text import CypherText
-from typing import Hashable
+from typing import Hashable, Union
 from dataclasses import dataclass
 from neomodel import StructuredNode
 
@@ -17,24 +17,13 @@ class Node(CypherText):
         labs = ":".join(self.label.inherited_labels())
         return f"({self.var}:{labs})"
 
-
-@dataclass(frozen=True)
-class UniqIdNode(CypherText):
-    label:StructuredNode
-    uid:Hashable
-    var:str = "target"
-
-    def build(self)->str:
-        labs = ":".join(self.label.inherited_labels())
-        v    = self.var
-        n = self.var_str
-        return f"({v}:{labs}) WHERE {v}.uid = '{self.uid}'"
-
-    @property
-    def var_str(self)->str:
-        labs = ":".join(self.label.inherited_labels())
-        v    = self.var
-        return f"({v}:{labs})"
+    def with_where(self, key, value, is_not:bool=False)->str:
+        if isinstance(value, str):
+            v = f"'{value}'"
+        else:
+            v = value
+        not_ = "NOT " if is_not else ""
+        return f"{self.text} WHERE {not_}{self.var}.{key} = {v}"
 
 
 @dataclass(frozen=True)

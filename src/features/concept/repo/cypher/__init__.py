@@ -1,6 +1,5 @@
 from .node import (
     Node
-    , UniqIdNode
     , NoneNode
     )
 from .path import (
@@ -8,4 +7,3 @@ from .path import (
     , PathArrow
     )
 from .result import Result
-from . import query
