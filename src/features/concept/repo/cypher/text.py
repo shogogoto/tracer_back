@@ -13,26 +13,57 @@ class CypherText(ABC):
     def text(self)->str:
         return self.build()
 
+@dataclass(frozen=True)
+class Where(CypherText):
+    var:str
+    key:str
+    value:Union[str,int]
+    with_not:bool = False
+
+    def build(self)->str:
+        if isinstance(self.value, str):
+            v = f"'{self.value}'"
+        else:
+            v = self.value
+        not_ = "NOT " if self.with_not else ""
+        return f"WHERE {not_}{self.var}.{self.key}={v}"
+
+@dataclass(frozen=True)
+class Blank(CypherText):
+    def build(self)->str:
+        return ""
+
 
 @dataclass(frozen=True)
 class Matcher(CypherText):
-    operand:str
+    target:CypherText
+    where:Where = Blank()
     var:str = None
+    optional:bool = False
 
     def build(self)->str:
+        t = self.target.text
+        w = self.where.text
         if self.var is None:
             v = ""
         else:
             v = f"{self.var} = "
-        return f"MATCH {v}{self.operand}"
+        o = "OPTIONAL " if self.optional else ""
+        return f"{o}MATCH {v}{t} {w}"
+
 
 @dataclass
-class QueryResolver(CypherText, Callable):
+class QueryBuilder(CypherText):
     matchers:list[Matcher] = field(default_factory=list)
     return_items:list[str] = field(default_factory=list)
 
-    def add_matcher(self, operand:str, var:str=None)->Matcher:
-        m = Matcher(operand, var)
+    def add_matcher(self,
+            t:CypherText
+            , w:Where=Blank()
+            , var:str=None
+            , optional:bool=False
+        )->Matcher:
+        m = Matcher(t, w, var, optional)
         self.matchers.append(m)
         return m
 
@@ -41,7 +72,7 @@ class QueryResolver(CypherText, Callable):
 
     def build(self)->str:
         matches = "\n".join([m.text for m in self.matchers])
-        returns = "RETURN " + ", ".join(self.return_items)
+        returns = "RETURN " + "\n, ".join(self.return_items)
         return matches + "\n" + returns
 
     def __call__(self)->Result:

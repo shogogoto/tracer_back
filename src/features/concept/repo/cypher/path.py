@@ -67,7 +67,7 @@ class PathArrow(CypherText):
 
     def to_path(self, source:Node, matched:Node)->Path:
         return Path(self, source, matched)
-        pass
+
 
 @dataclass
 class Path(CypherText):
