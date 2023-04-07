@@ -1,10 +1,10 @@
 from __future__ import annotations
-from neomodel import RelationshipDefinition
+from neomodel import StructuredNode, RelationshipDefinition
 from dataclasses import dataclass
 from .text import CypherText
 from .node import Node, NoneNode
 
-from typing import Union, Optional
+from typing import Union, Optional, Callable
 
 
 MinMaxDistance = Union[Optional[int],tuple[Optional[int],Optional[int]]]
@@ -24,6 +24,24 @@ def convert(value:MinMaxDistance)->str:
         return ""
     types = list(map(type,value))
     raise TypeError(f"arg's type is invalid {types}")
+
+
+@dataclass(frozen=True)
+class PathFactory(Callable):
+    label:StructuredNode
+    source:Node
+
+    def __call__(self,
+        relation:str
+        , minmax_dist:MinMaxDistance
+        , matched:Node
+            )->Path:
+        rel_def = self.rel_def(relation)
+        return PathArrow(rel_def, minmax_dist) \
+                .to_path(self.source, matched)
+
+    def rel_def(self, relation:str)->RelationshipDefinition:
+        return getattr(self.label, relation)
 
 
 @dataclass(frozen=True)
@@ -58,8 +76,8 @@ class Path(CypherText):
     matched:Node
 
     def build(self)->str:
-        s     = self.source.var_str
-        m     = self.matched.var_str
+        s     = self.source.text
+        m     = self.matched.text
         arrow = self.arrow.text
         if self.arrow.is_outgoing():
             return f"{s}{arrow}{m}"
@@ -77,6 +95,6 @@ class TipPath(CypherText):
     def build(self)->str:
         sp    = self.source_path
         arrow = PathArrow(sp.arrow.rel, 1)
-        n     = NoneNode()
+        n     = Node(self.source_path.matched.label, "")
         p     = Path(arrow, sp.matched, n)
         return f"{sp.text} WHERE NOT {p.text}"

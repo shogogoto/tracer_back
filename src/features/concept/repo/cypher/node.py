@@ -7,13 +7,9 @@ from neomodel import StructuredNode
 @dataclass(frozen=True)
 class Node(CypherText):
     label:StructuredNode
-    var:str = "n"
+    var:str = ""
 
     def build(self)->str:
-        return self.var_str
-
-    @property
-    def var_str(self)->str:
         labs = ":".join(self.label.inherited_labels())
         return f"({self.var}:{labs})"
 
