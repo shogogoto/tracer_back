@@ -43,7 +43,9 @@ def test_with_count_dists(spread_tree):
         .distanced(tip1, "leaf_dist") \
         .distanced(tip2, "root_dist")
 
-
+    print("##################################")
+    print(qb.text)
+    print()
     results, columns = db.cypher_query(qb.text, resolve_objects=True)
     res = Results(results, columns, s.columns)
     stats = res.statistics()

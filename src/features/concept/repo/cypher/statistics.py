@@ -20,8 +20,11 @@ class Statistics:
     builder:QueryBuilder
     columns:list[str] = field(default_factory=list)
 
-    def counted(self, ct:Path, column:str)->Statistics:
-        c = Counter(ct, column)
+    def counted(self, path:Path, column:str)->Statistics:
+        var = VarGenerator.generate()
+        self.builder.add_text(Matcher(path, var=var, optional=True))
+        c = Counter(var, column)
+        # c = Counter(ct, column)
         self.builder.add_return(c.text)
         cols = self.columns + [column]
         return Statistics(self.builder, cols)
@@ -37,19 +40,20 @@ class Statistics:
 
 @dataclass(frozen=True)
 class Counter(CypherText):
-    target:CypherText
-    # path_var:str
+    # target:CypherText
+    path_var:str
     column:str
 
     def build(self)->str:
-        # p = self.path_var
+        p = self.path_var
         # return f"{p} as {self.column}"
-        # return f"count({p}) as {self.column}"
+        return f"count(DISTINCT {p}) as {self.column}"
         t = self.target.text
         # return f"COUNT {{ {t} }} as {self.column}"
-        return "COUNT {\n" \
-                f"  {t}\n" \
-                f"}} as {self.column}"
+        return f"count {{ {t} }} as {self.column}"
+        # return "COUNT {\n" \
+        #         f"  {t}\n" \
+        #         f"}} as {self.column}"
 
 
 
