@@ -31,7 +31,7 @@ def test_with_count_dists(spread_tree):
     tip1 = f("dests", None, m1).tip()
     tip2 = f("srcs", None, m2).tip()
 
-    s = S.Statistics(qb) \
+    s = S.Statistics() \
         .counted(p1, "dest1") \
         .counted(p2, "dest_all") \
         .counted(p3, "src1") \
@@ -39,6 +39,7 @@ def test_with_count_dists(spread_tree):
         .distanced(tip1, "leaf_dist") \
         .distanced(tip2, "root_dist")
 
+    s.setup(qb)
     results, columns = db.cypher_query(qb.text, resolve_objects=True)
     res = Results(results, columns, s.columns)
     stats = res.statistics()
