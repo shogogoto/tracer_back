@@ -51,21 +51,22 @@ class Matcher(CypherText):
         o = "OPTIONAL " if self.optional else ""
         return f"{o}MATCH {v}{t} {w}"
 
+@dataclass(frozen=True)
+class With(CypherText):
+    value:str
+
+    def build(self)->str:
+        return self.value
+
 
 @dataclass
 class QueryBuilder(CypherText):
     matchers:list[Matcher] = field(default_factory=list)
     return_items:list[str] = field(default_factory=list)
 
-    def add_matcher(self,
-            t:CypherText
-            , w:Where=Blank()
-            , var:str=None
-            , optional:bool=False
-        )->Matcher:
-        m = Matcher(t, w, var, optional)
-        self.matchers.append(m)
-        return m
+    def add_text(self, t:CypherText)->CypherText:
+        self.matchers.append(t)
+        return t
 
     def add_return(self, item:str):
         self.return_items.append(item)

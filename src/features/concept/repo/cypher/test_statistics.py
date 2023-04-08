@@ -10,7 +10,7 @@ from .result import Results
 from neomodel import db
 
 # 関係先の数を集計
-def _test_with_count_dists(spread_tree):
+def test_with_count_dists(spread_tree):
     g, n_map = spread_tree
     root     = g[n_map[0]]
     succ1 = list(g.G.successors(root.uid))[0]
@@ -21,13 +21,17 @@ def _test_with_count_dists(spread_tree):
     qb   = repo.find(root.uid, None)
 
     n  = Node(Concept, "")
+    n1 = Node(Concept, "n1")
+    n2 = Node(Concept, "n2")
+    n3 = Node(Concept, "n3")
+    n4 = Node(Concept, "n4")
     m1 = Node(Concept, "dest_matched")
     m2 = Node(Concept, "src_matched")
     f  = PathFactory(Concept, repo.matched)
-    p1 = f("dests", 1, n)
-    p2 = f("dests", None, n)
-    p3 = f("srcs", 1, n)
-    p4 = f("srcs", None, n)
+    p1 = f("dests", 1,    n)
+    p2 = f("dests", None, n2)
+    p3 = f("srcs", 1,     n3)
+    p4 = f("srcs", None,  n4)
     tip1 = f("dests", None, m1).tip()
     tip2 = f("srcs", None, m2).tip()
 
@@ -39,7 +43,6 @@ def _test_with_count_dists(spread_tree):
         .distanced(tip1, "leaf_dist") \
         .distanced(tip2, "root_dist")
 
-    results, columns = db.cypher_query(qb.text, resolve_objects=True)
     res = Results(results, columns, s.columns)
     stats = res.statistics()
     uids = res.column_attrs("matched", "uid")
