@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Hashable, Union, Callable
 from dataclasses import dataclass, field
 from neomodel import db
-from .result import Result
 
 class CypherText(ABC):
     @abstractmethod

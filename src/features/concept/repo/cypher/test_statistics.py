@@ -10,7 +10,7 @@ from .result import Results
 from neomodel import db
 
 # 関係先の数を集計
-def _test_with_count_dists(spread_tree):
+def test_with_count_dists(spread_tree):
     g, n_map = spread_tree
     root     = g[n_map[0]]
     succ1 = list(g.G.successors(root.uid))[0]
@@ -38,11 +38,9 @@ def _test_with_count_dists(spread_tree):
         .distanced(tip1, "leaf_dist") \
         .distanced(tip2, "root_dist")
 
-    repo.find(root.uid, None)
-    results, columns = db.cypher_query(qb.text, resolve_objects=True)
-    res = Results(results, columns, s.columns)
+    res = repo.find(root.uid, minmax_dist=None)
     stats = res.statistics()
-    uids = res.column_attrs("matched", "uid")
+    uids = [r.uid for r in res.column(repo.matched.var)]
     i1   = uids.index(succ1)
     i2   = uids.index(succ2)
     i3   = uids.index(succ3)
