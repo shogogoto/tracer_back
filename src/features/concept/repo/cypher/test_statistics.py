@@ -43,6 +43,8 @@ def test_with_count_dists(spread_tree):
         .distanced(tip1, "leaf_dist") \
         .distanced(tip2, "root_dist")
 
+
+    results, columns = db.cypher_query(qb.text, resolve_objects=True)
     res = Results(results, columns, s.columns)
     stats = res.statistics()
     uids = res.column_attrs("matched", "uid")
