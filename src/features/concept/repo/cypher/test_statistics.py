@@ -1,4 +1,4 @@
-from ..test_nx_repo import spread_tree, narrow_tree
+from ..test_graph import spread_tree, narrow_tree
 
 from . import statistics as S
 from .. import relation_repo as R
