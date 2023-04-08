@@ -21,17 +21,13 @@ def test_with_count_dists(spread_tree):
     qb   = repo.find(root.uid, None)
 
     n  = Node(Concept, "")
-    n1 = Node(Concept, "n1")
-    n2 = Node(Concept, "n2")
-    n3 = Node(Concept, "n3")
-    n4 = Node(Concept, "n4")
     m1 = Node(Concept, "dest_matched")
     m2 = Node(Concept, "src_matched")
     f  = PathFactory(Concept, repo.matched)
     p1 = f("dests", 1,    n)
-    p2 = f("dests", None, n2)
-    p3 = f("srcs", 1,     n3)
-    p4 = f("srcs", None,  n4)
+    p2 = f("dests", None, n)
+    p3 = f("srcs", 1,     n)
+    p4 = f("srcs", None,  n)
     tip1 = f("dests", None, m1).tip()
     tip2 = f("srcs", None, m2).tip()
 
@@ -43,9 +39,6 @@ def test_with_count_dists(spread_tree):
         .distanced(tip1, "leaf_dist") \
         .distanced(tip2, "root_dist")
 
-    print("##################################")
-    print(qb.text)
-    print()
     results, columns = db.cypher_query(qb.text, resolve_objects=True)
     res = Results(results, columns, s.columns)
     stats = res.statistics()
@@ -63,33 +56,3 @@ def test_with_count_dists(spread_tree):
     assert stats[i1] == expected1
     assert stats[i2] == expected2
     assert stats[i3] == expected3
-
-# 先端(tips)の集計
-def _test_with_count_tips(narrow_tree):
-    g, n_map = narrow_tree
-    leaf = g[n_map[0]]
-
-    repo = R.RelationRepo(Concept, "srcs", resolved=False)
-    q    = repo.find_tips(leaf.uid)
-
-    arrow_to_all   = PathArrow(Concept.dests, minmax_dist=(1,))
-    arrow_from_all = PathArrow(Concept.srcs, minmax_dist=(1,))
-
-    m = q.path.matched
-    n1 = Node(Concept, "x")
-    n2 = Node(Concept, "y")
-    tip1 = Path(arrow_to_all, m, n1).tip()
-    tip2 = Path(arrow_from_all, m, n2).tip()
-
-    c1 = S.Counter(tip1, "dest_all")
-    c2 = S.Counter(tip2, "src_all")
-
-    res = q(c1, c2)
-    print(q.text)
-    for r in res.zip_():
-        print(r)
-
-
-
-def test_with_distance_from_tips(narrow_tree):
-    pass

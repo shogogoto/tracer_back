@@ -51,13 +51,6 @@ class Matcher(CypherText):
         o = "OPTIONAL " if self.optional else ""
         return f"{o}MATCH {v}{t} {w}"
 
-@dataclass(frozen=True)
-class With(CypherText):
-    value:str
-
-    def build(self)->str:
-        return self.value
-
 
 @dataclass
 class QueryBuilder(CypherText):

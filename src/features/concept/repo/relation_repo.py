@@ -34,6 +34,5 @@ class RelationRepo:
         w = T.Where(self.target.var, "uid", uid)
         b.add_text(T.Matcher(self.target, where=w))
         b.add_text(T.Matcher(path))
-        b.add_text(T.With(f"WITH {self.target.var}, {self.matched.var}"))
         b.add_return(self.matched.var)
         return b() if self.resolved else b
