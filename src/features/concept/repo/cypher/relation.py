@@ -2,16 +2,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 from neomodel import StructuredNode, db
-from . import cypher as C
-from .cypher import text as T
-from .cypher.path import MinMaxDistance, Path, PathFactory
-from .cypher import Node
-from .cypher.statistics import Statistics
-from .cypher.result import Results
+from . import text as T
+from .path import MinMaxDistance, Path, PathFactory
+from . import Node
+from .statistics import Statistics
+from .result import Results
 
 # QueryのFactoryでもある
 @dataclass
-class RelationRepo:
+class RelationQuery:
     label:StructuredNode
     relation:str
     statistics:Optional[Statistics] = Statistics()

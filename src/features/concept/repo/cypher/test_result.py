@@ -1,4 +1,4 @@
-from ..test_graph import narrow_tree
+from .test_graph import narrow_tree
 from . import result as R
 
 def test_getattr_for_resolved_result(narrow_tree):

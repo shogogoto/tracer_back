@@ -1,14 +1,13 @@
 import pytest
 from .graph import NeoDiGraph as ND
-from . import Concept
+from .. import Concept
 import networkx as nx
-from . import relation_repo as Q
+from . import relation as Q
 from functools import reduce, cache
 
 
 # テスト用グラフ作成ユーティリティ
 def test_create_graph():
-    # g = G(Concept)
     g = nx.DiGraph()
     g.add_node(1, name="nx1")
     g.add_node(2, name="nx2")
@@ -58,7 +57,7 @@ def test_find_source(narrow_tree):
     pred2 = reduce(set.union, [set(g.G.predecessors(n)) for n in pred1])
     pred3 = reduce(set.union, [set(g.G.predecessors(n)) for n in pred2])
 
-    repo = Q.RelationRepo(Concept, "srcs")
+    repo = Q.RelationQuery(Concept, "srcs")
     result1  = repo.find(leaf.uid, 1)
     result2  = repo.find(leaf.uid, 2)
     result3  = repo.find(leaf.uid, 3)
@@ -69,8 +68,6 @@ def test_find_source(narrow_tree):
     assert pred3 == result3.uids
     assert pred2.union(pred3) == result23.uids
 
-    # with pytest.raises(Exception) as e:
-    #     Q.RelationRepo.find(root.uid, 3, 2)
 
 # 1階、2階、3階の関係先を取得
 def test_find_destinations(spread_tree):
@@ -80,7 +77,7 @@ def test_find_destinations(spread_tree):
     succ2 = reduce(set.union, [set(g.G.successors(n)) for n in succ1])
     succ3 = reduce(set.union, [set(g.G.successors(n)) for n in succ2])
 
-    repo = Q.RelationRepo(Concept, "dests")
+    repo = Q.RelationQuery(Concept, "dests")
     result1  = repo.find(root.uid, 1)
     result2  = repo.find(root.uid, 2)
     result3  = repo.find(root.uid, 3)
@@ -99,7 +96,7 @@ def test_find_roots(narrow_tree):
     pred2 = list(g.G.predecessors(pred1))[0]
     pred3 = list(g.G.predecessors(pred2))[0]
 
-    repo = Q.RelationRepo(Concept, "srcs")
+    repo = Q.RelationQuery(Concept, "srcs")
     tips1 = repo.find(leaf.uid, 3)
     tips2 = repo.find(pred1, 2)
     tips3 = repo.find(pred2, 1)
@@ -123,7 +120,7 @@ def test_find_leaves(spread_tree):
     succ2 = list(g.G.successors(succ1))[0]
     succ3 = list(g.G.successors(succ2))[0]
 
-    repo = Q.RelationRepo(Concept, "dests")
+    repo = Q.RelationQuery(Concept, "dests")
     tips1 = repo.find(root.uid, 3)
     tips2 = repo.find(succ1, 2)
     tips3 = repo.find(succ2, 1)

@@ -1,7 +1,7 @@
-from ..test_graph import spread_tree, narrow_tree
+from .test_graph import spread_tree, narrow_tree
 
 from . import statistics as S
-from .. import relation_repo as R
+from . import relation as R
 from .. import Concept
 from .path import Path, PathArrow, PathFactory
 from .node import NoneNode, Node
@@ -17,7 +17,7 @@ def test_with_count_dists(spread_tree):
     succ2 = list(g.G.successors(succ1))[0]
     succ3 = list(g.G.successors(succ2))[0]
 
-    repo = R.RelationRepo(Concept, "dests")
+    repo = R.RelationQuery(Concept, "dests")
 
     n  = Node(Concept, "")
     m1 = Node(Concept, "dest_matched")
