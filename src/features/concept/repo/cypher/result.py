@@ -40,18 +40,58 @@ class Result:
     #     return set([getattr(r, name) for r in self.resolved])
 
 @dataclass(frozen=True)
+class ResolvedResult:
+    values:list[StructuredNode]
+
+    @property
+    def propkeys(self)->list[str]:
+        if len(self.values) == 0:
+            return []
+        first = self.values[0]
+        return list(first.__properties__.keys())
+
+
+    # 複数形のprop attr name
+    @property
+    def plural_propkeys(self)->list[str]:
+        return [k + "s" for k in self.propkeys]
+
+    def __getattr__(self, name:str):
+        plurals = self.plural_propkeys
+        if name in plurals:
+            i = plurals.index(name)
+            key = self.propkeys[i]
+            ls = [getattr(v, key) for v in self.values]
+            return set(ls)
+        else:
+            return set()
+
+    def __getitem__(self, n)->StructuredNode:
+        return sel.values[n]
+
+
+
+@dataclass(frozen=True)
 class Results:
-    results:list
+    results:list[list]
     columns:list[str]
     stats_columns:list[str]
 
-    def column(self, name)->list:
-        i = self.columns.index(name)
-        return [r[i] for r in self.results]
+    @property
+    def resolved_columns(self)->list[str]:
+        return [
+            col for col in self.columns
+                if col not in self.stats_columns
+        ]
 
-    def column_attrs(self, colname:str, attrname:str):
-        col = self.column(colname)
-        return [getattr(c, attrname) for c in col]
+    def __getitem__(self, n:int):
+        return self.results[n]
+
+    def __getattr__(self, name)->set:
+        if len(self.resolved_columns) == 1:
+            r = [r[0] for r in self.results]
+            resolved = ResolvedResult(r)
+            return getattr(resolved, name)
 
     def statistics(self)->list[dict]:
         i_stats = [

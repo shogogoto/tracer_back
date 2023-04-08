@@ -1,38 +1,45 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from neomodel import StructuredNode, RelationshipDefinition
+from typing import Optional
+from neomodel import StructuredNode, db
 from . import cypher as C
 from .cypher import text as T
-from .cypher.path import MinMaxDistance, Path, PathArrow, PathFactory
+from .cypher.path import MinMaxDistance, Path, PathFactory
 from .cypher import Node
-from typing import Union
-
+from .cypher.statistics import Statistics
+from .cypher.result import Results
 
 # QueryのFactoryでもある
 @dataclass
 class RelationRepo:
     label:StructuredNode
     relation:str
-    resolved:bool = True
+    statistics:Optional[Statistics] = Statistics()
 
     def __post_init__(self):
-        self.target  = C.Node(self.label, "target")
-        self.matched = C.Node(self.label, "matched")
+        self.target  = Node(self.label, "target")
+        self.matched = Node(self.label, "matched")
         self.factory = PathFactory(self.label, self.target)
 
-    def find(self, uid:str, minmax_dist:MinMaxDistance)->Result:
+    def find(self, uid:str, minmax_dist:MinMaxDistance)->Results:
         p = self.factory(self.relation, minmax_dist, self.matched)
-        return self.__resolver(p, uid)
+        return self.__resolve(p, uid)
 
-    def find_tips(self, uid:str)->Result:
+    def find_tips(self, uid:str)->Results:
         p = self.factory(self.relation, None, self.matched) \
                 .tip()
-        return self.__resolver(p, uid)
+        return self.__resolve(p, uid)
 
-    def __resolver(self, path:Path, uid:str)->T.QueryBuilder:
+    def __resolve(self, path:Path, uid:str)->T.QueryBuilder:
         b = T.QueryBuilder()
         w = T.Where(self.target.var, "uid", uid)
         b.add_text(T.Matcher(self.target, where=w))
         b.add_text(T.Matcher(path))
         b.add_return(self.matched.var)
-        return b() if self.resolved else b
+
+        self.statistics.setup(b)
+
+        results, columns = db.cypher_query(b.text, resolve_objects=True)
+        res = Results(results, columns, self.statistics.columns)
+        return res
+

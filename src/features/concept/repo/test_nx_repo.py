@@ -1,5 +1,5 @@
 import pytest
-from .nx_repo import NeoDiGraph as ND
+from .graph import NeoDiGraph as ND
 from . import Concept
 import networkx as nx
 from . import relation_repo as Q

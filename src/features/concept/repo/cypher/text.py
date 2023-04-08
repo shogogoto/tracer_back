@@ -68,9 +68,3 @@ class QueryBuilder(CypherText):
         matches = "\n".join([m.text for m in self.matchers])
         returns = "RETURN " + "\n, ".join(self.return_items)
         return matches + "\n" + returns
-
-    def __call__(self)->Result:
-        results, columns = db.cypher_query(
-                self.text,
-                resolve_objects=True)
-        return Result([r[0] for r in results], columns)
