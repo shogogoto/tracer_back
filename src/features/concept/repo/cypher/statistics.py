@@ -1,18 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from textwrap import dedent
 from .text import QueryBuilder, CypherText, Matcher, Callable
 from .path import Path
+from .variable import VarGenerator
 
-
-class VarGenerator:
-    __count:int = 0
-
-    @classmethod
-    def generate(cls)->str:
-        var = f"gen_var_{cls.__count}"
-        cls.__count += 1
-        return var
 
 CommandType = Callable[[QueryBuilder],None]
 
@@ -61,7 +52,9 @@ class Counter(CypherText):
 class Distance(CypherText):
     path_var:str
     column:str
+    aggregate:str = "avg"
 
     def build(self)->str:
         p = self.path_var
-        return f"avg(coalesce(length({p}), 0)) as {self.column}"
+        ag = self.aggregate
+        return f"{ag}(coalesce(length({p}), 0)) as {self.column}"

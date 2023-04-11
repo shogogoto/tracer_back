@@ -2,8 +2,8 @@ from __future__ import annotations
 from neomodel import StructuredNode, RelationshipDefinition
 from dataclasses import dataclass
 from .text import CypherText
+from .variable import VarGenerator
 from .node import Node, NoneNode
-
 from typing import Union, Optional, Callable
 
 
@@ -39,6 +39,10 @@ class PathFactory(Callable):
         rel_def = self.rel_def(relation)
         return PathArrow(rel_def, minmax_dist) \
                 .to_path(self.source, matched)
+
+    def tip(self, relation:str)->Path:
+        middle = Node(self.label, VarGenerator.generate())
+        return self(relation, None, middle).tip()
 
     def rel_def(self, relation:str)->RelationshipDefinition:
         return getattr(self.label, relation)

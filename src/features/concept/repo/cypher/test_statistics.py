@@ -20,15 +20,13 @@ def test_with_count_dists(spread_tree):
     repo = R.RelationQuery(Concept, "dests")
 
     n  = Node(Concept, "")
-    m1 = Node(Concept, "dest_matched")
-    m2 = Node(Concept, "src_matched")
     f  = PathFactory(Concept, repo.matched)
     p1 = f("dests", 1,    n)
     p2 = f("dests", None, n)
     p3 = f("srcs", 1,     n)
     p4 = f("srcs", None,  n)
-    tip1 = f("dests", None, m1).tip()
-    tip2 = f("srcs", None, m2).tip()
+    tip1 = f.tip("dests")
+    tip2 = f.tip("srcs")
 
     repo.statistics = S.Statistics() \
         .counted(p1, "dest1") \
