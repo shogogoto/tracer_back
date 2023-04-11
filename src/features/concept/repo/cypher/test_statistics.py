@@ -1,7 +1,7 @@
 from .test_graph import spread_tree, narrow_tree
 
 from . import statistics as S
-from . import relation as R
+from . import facade as R
 from .. import Concept
 from .path import Path, PathArrow, PathFactory
 from .node import NoneNode, Node

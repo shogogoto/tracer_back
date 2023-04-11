@@ -4,9 +4,14 @@ from typing import Optional
 from neomodel import StructuredNode, db
 from . import text as T
 from .path import MinMaxDistance, Path, PathFactory
-from . import Node
+from .node import Node
 from .statistics import Statistics
 from .result import Results
+
+
+def resolve(query:str, stats_columns:list[str])->Results:
+    results, columns = db.cypher_query(query, resolve_objects=True)
+    return Results(results, columns, stats_columns)
 
 # QueryのFactoryでもある
 @dataclass
@@ -31,14 +36,29 @@ class RelationQuery:
 
     def __resolve(self, path:Path, uid:str)->T.QueryBuilder:
         b = T.QueryBuilder()
-        w = T.Where(self.target.var, "uid", uid)
+        p = T.Property(self.target.var, "uid", uid)
+        w = T.Where(p.text)
         b.add_text(T.Matcher(self.target, where=w))
         b.add_text(T.Matcher(path))
         b.add_return(self.matched.var)
-
         self.statistics.setup(b)
+        return resolve(b.text, self.statistics.columns)
 
-        results, columns = db.cypher_query(b.text, resolve_objects=True)
-        res = Results(results, columns, self.statistics.columns)
-        return res
 
+@dataclass
+class PropQuery:
+    label:StructuredNode
+    statistics:Optional[Statistics] = Statistics()
+
+    def __post_init__(self):
+        self.matched  = Node(self.label, "matched")
+
+    def find(self, key:str, value:str)->Results:
+        v = f".*{value}.*"
+        b = T.QueryBuilder()
+        p = T.Property(self.matched.var, key, v, regex=True)
+        w = T.Where(p.text)
+        b.add_text(T.Matcher(self.matched, where=w))
+        b.add_return(self.matched.var)
+        self.statistics.setup(b)
+        return resolve(b.text, self.statistics.columns)

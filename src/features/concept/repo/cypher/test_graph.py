@@ -2,7 +2,7 @@ import pytest
 from .graph import NeoDiGraph as ND
 from .. import Concept
 import networkx as nx
-from . import relation as Q
+from . import facade as Q
 from functools import reduce, cache
 
 

@@ -42,6 +42,9 @@ class NeoDiGraph:
     def nodes(self):
         return [self[n] for n in self.G.nodes]
 
+    def prop(self, key:str)->set:
+        return set([getattr(n, key) for n in self.nodes])
+
     @classmethod
     def of(cls,
            label:StructuredNode,

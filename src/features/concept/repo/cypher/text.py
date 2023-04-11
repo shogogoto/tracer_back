@@ -14,18 +14,27 @@ class CypherText(ABC):
 
 @dataclass(frozen=True)
 class Where(CypherText):
+    operand:str
+    with_not:bool = False
+
+    def build(self)->str:
+        not_ = "NOT " if self.with_not else ""
+        return f"WHERE {not_}{self.operand}"
+
+@dataclass(frozen=True)
+class Property(CypherText):
     var:str
     key:str
     value:Union[str,int]
-    with_not:bool = False
+    regex:bool = False
 
     def build(self)->str:
         if isinstance(self.value, str):
             v = f"'{self.value}'"
         else:
             v = self.value
-        not_ = "NOT " if self.with_not else ""
-        return f"WHERE {not_}{self.var}.{self.key}={v}"
+        r = "~ " if self.regex else ""
+        return f"{self.var}.{self.key}={r}{v}"
 
 @dataclass(frozen=True)
 class Blank(CypherText):
