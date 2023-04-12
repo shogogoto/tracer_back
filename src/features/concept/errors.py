@@ -1,14 +1,42 @@
 from fastapi import HTTPException, status
+from dataclasses import dataclass
+from .param import Item
+from pydantic.typing import Callable
+from abc import ABC, abstractmethod
 
 
-class NotFoundError(HTTPException):
-    # status_code = status.HTTP_404_NOT_FOUND
-    def __init__(self, msg: str):
-        super().__init__(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail=msg
-        )
+class DomainError(HTTPException):
+    status_code:int
+    title:str
 
+    def __new__(cls, *args, **kwargs):
+        dataclass(cls)
+        return super().__new__(cls)
+
+    @property
+    def detail(self)->dict:
+        return {
+            "title": self.title
+          , "message": self.message
+        }
+
+class AlreadyCreatedError(DomainError):
+    item:Item
+    status_code:int = status.HTTP_409_CONFLICT
+    title:str = "Already created"
+
+    @property
+    def message(self)->str:
+        return f"This is already exists, {self.item}"
+
+class NotFoundError(DomainError):
+    uid:str
+    status_code:int = status.HTTP_404_NOT_FOUND
+    title:str = "Not found"
+
+    @property
+    def message(self)->str:
+        return f"This is not exists, {self.uid}"
 
 class SystemError(Exception):
     pass
