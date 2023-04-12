@@ -7,15 +7,16 @@ name = "pypi"
 fastapi = "==0.70.0"
 neomodel = "*"
 networkx = "*"
+dict-hash = "*"
 
 [dev-packages]
 jedi-language-server = "*"
 neovim = "*"
-pynvim = "*"
 uvicorn = "*"
 pytest = "*"
 pytest-watch = "*"
 requests = "*"
+pynvim = "*"
 
 [requires]
 python_version = "3.9"
