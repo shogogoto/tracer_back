@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from neomodel import StructuredNode
-from itertools import zip_longest
 
 
 @dataclass(frozen=True)
@@ -45,7 +44,7 @@ class Results:
     def resolved_columns(self)->list[str]:
         return [
             col for col in self.columns
-                if col not in self.stats_columns
+            if col not in self.stats_columns
         ]
 
     def __getitem__(self, n:int):
@@ -71,7 +70,20 @@ class Results:
             {
                 self.columns[i]: r[i]
                 for i in i_stats
-             }
+            }
             for r in self.results
         ]
 
+    @property
+    def stats_index(self)->dict[str,int]:
+        return {
+            s: self.columns.index(s)
+            for s in self.stats_columns
+        }
+
+    @property
+    def resolved_index(self)->dict[str,int]:
+        return {
+            s: self.columns.index(s)
+            for s in self.resolved_columns
+        }

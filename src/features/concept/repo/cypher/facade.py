@@ -51,7 +51,8 @@ class PropQuery:
     statistics:Optional[Statistics] = Statistics()
 
     def __post_init__(self):
-        self.matched  = Node(self.label, "matched")
+        self.matched = Node(self.label, "matched")
+        self.factory = PathFactory(self.label, self.matched)
 
     def find(self, key:str, value:str)->Results:
         v = f".*{value}.*"
