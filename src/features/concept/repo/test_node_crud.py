@@ -3,7 +3,7 @@ from .cypher.test_graph import narrow_tree, spread_tree
 
 from functools import cache
 from .node_crud import (
-    CommandRepo as Cmd
+    ConceptCommand as Cmd
     , UidQuery
     , WithStatisticsQuery
     )

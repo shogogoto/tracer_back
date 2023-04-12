@@ -10,59 +10,29 @@ from .cypher.node import Node
 from .cypher.result_convert import DictConverter
 
 
-def to_model(c:Concept)->Item:
-    return Item(**c.__properties__)
 
-def to_mapper(item:Item)->Concept:
-    return Concept(**item.dict())
-
-
-# エラー
 @dataclass(frozen=True)
-class CommandRepo:
+class ConceptCommand:
     item:Item
 
     def create(self)->Item:
         i = self.item
-        if i.exists():
+        if UidQuery(i.uid).exists():
             raise E.AlreadyCreatedError(item=i)
         c = Concept.create(i.dict())[0]
-        return to_model(c)
+        return Item(**c.__properties__)
 
     def update(self, to:Item)->Item:
         c = UidQuery(self.item.uid).find_strict()
-        c = to_mapper(c)
         for k, v in to.dict().items():
             if v is not None:
                 setattr(c, k, v)
         s = c.save()
-        return to_model(s)
+        return Item(**s.__properties__)
 
     def delete(self)->bool:
         c = UidQuery(self.item.uid).find_strict()
-        return Concept(**c.dict()).delete()
-
-    def connect_dest(self, dest_item:Item):
-        if not self.item.exists():
-            raise E.NotFoundError(src_item)
-        if not dest_item.exists():
-            raise E.NotFoundError(src_item)
-        src  = to_mapper(self.item)
-        src.refresh()
-        dest = to_mapper(dest_item)
-        dest.refresh()
-        src.dests.connect(dest)
-
-    def connect_src(self, src_item:Item):
-        if not src_item.exists():
-            raise E.NotFoundError(src_item)
-        if not self.item.exists():
-            raise E.NotFoundError(src_item)
-        src  = to_mapper(src_item)
-        src.refresh()
-        dest = to_mapper(self.item)
-        dest.refresh()
-        src.dests.connect(dest)
+        return c.delete()
 
 
 @dataclass(frozen=True)
@@ -72,16 +42,19 @@ class UidQuery:
     def find(self)->Optional[Item]:
         c = Concept.nodes.first_or_none(uid=self.uid)
         if c is None:
-            return N
+            return None
         else:
             return Item(**c.__properties__)
 
-    def find_strict(self)->Item:
+    def find_strict(self)->Concept:
         c = Concept.nodes.first_or_none(uid=self.uid)
         if c is None:
             raise E.NotFoundError(uid=self.uid)
         else:
-            return Item(**c.__properties__)
+            return c
+
+    def exists(self)->bool:
+        return self.find() is not None
 
 
 @dataclass(frozen=True)
@@ -101,3 +74,7 @@ class WithStatisticsQuery:
                 .counted(p3, "roots") \
                 .counted(p4, "leaves")
         return q.find("name", value)
+
+    def find_adjacency_by_uid(self, uid:str):
+        pass
+

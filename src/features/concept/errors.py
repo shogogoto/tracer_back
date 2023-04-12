@@ -38,6 +38,31 @@ class NotFoundError(DomainError):
     def message(self)->str:
         return f"This is not exists, {self.uid}"
 
+
+class AlreadyConnectedError(DomainError):
+    src_item:Item
+    dest_item:Item
+    status_code:int = status.HTTP_409_CONFLICT
+    title:str = "Already connected"
+
+    @property
+    def message(self)->str:
+        return "This is already connected" \
+               f"from {self.src_item}" \
+               f"to {self.dest_item}"
+
+class NotConnectedError(DomainError):
+    src_item:Item
+    dest_item:Item
+    status_code:int = status.HTTP_404_NOT_FOUND
+    title:str = "Not connected"
+
+    @property
+    def message(self)->str:
+        return "This is not connected" \
+               f"from {self.src_item}" \
+               f"to {self.dest_item}"
+
 class SystemError(Exception):
     pass
 
