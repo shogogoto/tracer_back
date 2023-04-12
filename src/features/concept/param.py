@@ -1,23 +1,14 @@
 from __future__ import annotations
 from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
 from typing import Optional
-from neomodel import StructuredNode
-from .repo import Concept
 
 
 class Item(BaseModel):
     name: str
-    description: Optional[str] = None
+    description:Optional[str] = None
+    uid:Optional[str] = None
+    id:Optional[int] = None
 
-    def toModel(self) -> StructuredNode:
-        return Concept(
-                name=self.name,
-                description=self.description
-                )
-
-    @classmethod
-    def create(cls,
-            name:str,
-            description:str = None
-        )->Item:
-        return cls(name=name, description=description)
+    def exists(self)->bool:
+        return self.id is not None
