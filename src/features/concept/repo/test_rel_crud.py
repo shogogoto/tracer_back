@@ -3,7 +3,7 @@ from functools import cache
 from .rel_crud import (
     ConnectionRepo as Cmd
     )
-from .node_crud import ConceptCommand, WithStatisticsQuery
+from .node_crud import ConceptCommand
 from ..param import Item
 from .. import errors as E
 

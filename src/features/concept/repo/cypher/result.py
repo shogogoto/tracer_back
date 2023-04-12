@@ -61,6 +61,9 @@ class Results:
             resolved = ResolvedResult(col)
             return getattr(resolved, name)
 
+    def __len__(self):
+        return len(self.results)
+
     def statistics(self)->list[dict]:
         i_stats = [
             self.columns.index(s)

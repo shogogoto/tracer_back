@@ -3,12 +3,6 @@ from dataclasses import dataclass
 from ..param import Item
 from typing import Optional
 from .. import errors as E
-from .cypher.facade import PropQuery
-from .cypher.result import Results
-from .cypher.statistics import Statistics
-from .cypher.node import Node
-from .cypher.result_convert import DictConverter
-
 
 
 @dataclass(frozen=True)
@@ -55,26 +49,3 @@ class UidQuery:
 
     def exists(self)->bool:
         return self.find() is not None
-
-
-@dataclass(frozen=True)
-class WithStatisticsQuery:
-
-    def find_by_name(self, value:str)->Results:
-        q = PropQuery(Concept)
-        n = Node(Concept, "")
-        p1 = q.factory("srcs", 1, n)
-        p2 = q.factory("dests", 1, n)
-        p3 = q.factory.tip("srcs")
-        p4 = q.factory.tip("dests")
-
-        q.statistics = Statistics() \
-                .counted(p1, "source1") \
-                .counted(p2, "destination1") \
-                .counted(p3, "roots") \
-                .counted(p4, "leaves")
-        return q.find("name", value)
-
-    def find_adjacency_by_uid(self, uid:str):
-        pass
-

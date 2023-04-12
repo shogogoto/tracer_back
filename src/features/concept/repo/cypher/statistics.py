@@ -20,7 +20,11 @@ class Statistics:
             builder.add_return(c.text)
         return self.__add(column, command)
 
-    def distanced(self, path:Path, column:str)->Statistics:
+    def distanced(self,
+            path:Path
+            , column:str
+            , aggregate:str="avg"
+        )->Statistics:
         def command(builder:QueryBuilder):
             var = VarGenerator.generate()
             builder.add_text(Matcher(path, var=var, optional=True))

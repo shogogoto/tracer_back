@@ -1,11 +1,8 @@
 import pytest
-from .cypher.test_graph import narrow_tree, spread_tree
 
-from functools import cache
 from .node_crud import (
     ConceptCommand as Cmd
     , UidQuery
-    , WithStatisticsQuery
     )
 from ..param import Item
 from .. import errors as E
@@ -46,9 +43,3 @@ def test_delete_not_found():
     assert Cmd(created).delete()
     with pytest.raises(E.NotFoundError) as e:
         Cmd(created).delete()
-
-
-def test_find_by_name(narrow_tree):
-    g, _n_map = narrow_tree
-    results = WithStatisticsQuery().find_by_name("source")
-    assert results.names == g.prop("name")

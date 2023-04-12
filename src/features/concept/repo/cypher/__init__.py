@@ -1,3 +1,8 @@
 from .graph import NeoDiGraph
-from .facade import RelationQuery
+from .facade import RelationQuery, PropQuery
 from .statistics import Statistics
+
+from .node import Node
+from .path import Path, PathArrow, PathFactory
+from .result import Results
+from .result_convert import DictConverter

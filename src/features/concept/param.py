@@ -9,6 +9,3 @@ class Item(BaseModel):
     description:Optional[str] = None
     uid:Optional[str] = None
     id:Optional[int] = None
-
-    def exists(self)->bool:
-        return self.id is not None
