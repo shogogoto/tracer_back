@@ -13,17 +13,8 @@ class Item(Parameter):
     uid:Optional[str] = None
 
 
-class Connection(BaseModel):
-    src_uid:str
-    dest_uid:str
-
-
-class SourceReconnection(Connection):
-    new_src_uid:str
-
-
-class DestinationReconnection(Connection):
-    new_dest_uid:str
+class Reconnection(BaseModel):
+    new_uid:str
 
 
 class StreamStatistics(BaseModel):

@@ -6,7 +6,6 @@ from .repo import (
 from .param import (
     Item
     , Parameter
-    , Connection
     , ItemView
     , StreamView
     )
@@ -51,8 +50,8 @@ def connect(src_uid, dest_uid)->bool:
 
 
 @db.write_transaction
-def disconnect(conn:Connection)->bool:
-    return InferRepo(conn.src_uid, conn.dest_uid).delete()
+def disconnect(src_uid:str, dest_uid:str)->bool:
+    return InferRepo(src_uid, dest_uid).delete()
 
 
 @db.write_transaction
@@ -72,7 +71,7 @@ def change_infer_destination(
         , dest_new_uid:str
     )->bool:
     return InferRepo(src_uid, dest_old_uid) \
-            .replace_dest(destc_new_uid)
+            .replace_dest(dest_new_uid)
 
 
 @db.read_transaction
@@ -82,9 +81,9 @@ def find_by_name(name:str)->list[ItemView]:
 
 
 @db.read_transaction
-def find_stream_by_uid(uid:str):
+def find_stream_by_uid(uid:str)->StreamView:
     srcs, dests = WithStatisticsQuery().find_adjacent_by_uid(uid)
-    return StremView(
+    return StreamView(
         sources=WithStatisticsQuery.results2model(srcs)
         , destinations=WithStatisticsQuery.results2model(dests)
     )
