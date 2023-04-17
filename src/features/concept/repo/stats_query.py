@@ -11,8 +11,15 @@ from .cypher import (
     , DictConverter
     )
 
+from ..param import (
+    StreamStatistics
+    , Item
+    , ItemView
+    )
+from .cypher import DictConverter
 
-def compas_statistics(matched:Node)->Statistics:
+
+def stream_statistics(matched:Node)->Statistics:
     n  = Node(Concept, "")
     f = PathFactory(Concept, matched)
     p1 = f("dests", 1,    n)
@@ -31,20 +38,47 @@ def compas_statistics(matched:Node)->Statistics:
         .distanced(tip2, "root_distance", "max")
 
 
-@dataclass(frozen=True)
 class WithStatisticsQuery:
-
-    def find_by_name(self, value:str)->Results:
+    @staticmethod
+    def find_by_name(value:str)->Results:
         q = PropQuery(Concept)
-        q.statistics = compas_statistics(q.matched)
+        q.statistics = stream_statistics(q.matched)
         return q.find("name", value)
 
-
-    def find_adjacent_by_uid(self, uid:str)->tuple[Results,Results]:
+    @staticmethod
+    def find_adjacent_by_uid(uid:str)->tuple[Results,Results]:
         srcQ  = RelationQuery(Concept, "srcs")
         destQ = RelationQuery(Concept, "dests")
-        srcQ.statistics  = compas_statistics(srcQ.matched)
-        destQ.statistics = compas_statistics(destQ.matched)
+        srcQ.statistics  = stream_statistics(srcQ.matched)
+        destQ.statistics = stream_statistics(destQ.matched)
         srcs  = srcQ.find(uid, 1)
         dests = destQ.find(uid, 1)
         return srcs, dests
+
+    @staticmethod
+    def find_stream_by_uid(uid:str)->tuple[Results,Results]:
+        srcQ  = RelationQuery(Concept, "srcs")
+        destQ = RelationQuery(Concept, "dests")
+        srcQ.statistics  = stream_statistics(srcQ.matched)
+        destQ.statistics = stream_statistics(destQ.matched)
+        srcs  = srcQ.find(uid, None)
+        dests = destQ.find(uid, None)
+        return srcs, dests
+
+    @staticmethod
+    def results2model(res:Results)->list[ItemView]:
+        dict_list = DictConverter(res)()
+        def to_model(d:dict):
+            item = Item(**d["matched"])
+            s = StreamStatistics(
+                upper_neighbor_count=d["src1"]
+              , lower_neighbor_count=d["dest1"]
+              , all_upper_count=d["src_all"]
+              , all_lower_count=d["dest_all"]
+              , max_distance_from_roots=d["root_distance"]
+              , max_distance_from_leaves=d["leaf_distance"]
+            )
+            return ItemView(item=item, statistics=s)
+
+        return [to_model(d) for d in dict_list]
+
