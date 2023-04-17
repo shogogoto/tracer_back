@@ -2,7 +2,6 @@ from ..param import Item, Parameter, Reconnection
 from .. import usecase as UC
 from fastapi import status
 from ...common import routers
-# responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
 
 router = routers.create(
     prefix="/concepts/{uid}/destinations"

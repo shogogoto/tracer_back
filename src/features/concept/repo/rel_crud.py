@@ -30,7 +30,7 @@ class InferRepo:
         self.delete()
         replaced = UidQuery(src_uid).find_strict()
         src, dest = self.mapper
-        return dest.srcss.connect(replaced)
+        return dest.srcs.connect(replaced)
 
     def delete(self)->bool:
         src, dest = self.mapper
