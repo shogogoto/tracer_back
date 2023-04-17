@@ -27,14 +27,14 @@ class RelationQuery:
 
     def find(self, uid:str, minmax_dist:MinMaxDistance)->Results:
         p = self.factory(self.relation, minmax_dist, self.matched)
-        return self.__resolve(p, uid)
+        return self.__resolve_matched(p, uid)
 
     def find_tips(self, uid:str)->Results:
         p = self.factory(self.relation, None, self.matched) \
                 .tip()
-        return self.__resolve(p, uid)
+        return self.__resolve_matched(p, uid)
 
-    def __resolve(self, path:Path, uid:str)->T.QueryBuilder:
+    def __resolve_matched(self, path:Path, uid:str)->T.QueryBuilder:
         b = T.QueryBuilder()
         p = T.Property(self.target.var, "uid", uid)
         w = T.Where(p.text)
@@ -44,6 +44,23 @@ class RelationQuery:
         self.statistics.setup(b)
         return resolve(b.text, self.statistics.columns)
 
+
+@dataclass
+class TargetQuery:
+    label:StructuredNode
+    statistics:Optional[Statistics] = Statistics()
+
+    def __post_init__(self):
+        self.target  = Node(self.label, "matched")
+
+    def find(self, uid:str)->Results:
+        b = T.QueryBuilder()
+        p = T.Property(self.target.var, "uid", uid)
+        w = T.Where(p.text)
+        b.add_text(T.Matcher(self.target, where=w))
+        b.add_return(self.target.var)
+        self.statistics.setup(b)
+        return resolve(b.text, self.statistics.columns)
 
 @dataclass
 class PropQuery:

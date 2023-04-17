@@ -35,6 +35,6 @@ async def replace_source(
     return UC.change_infer_source(uid, src_uid, reconn.new_uid)
 
 @router.get(""
-    , response_model=ItemsView)
+    , response_model=Item)
 async def find_sources(uid:str):
     return UC.find_sources(uid)

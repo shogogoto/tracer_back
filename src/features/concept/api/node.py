@@ -1,7 +1,14 @@
 from ...common import routers
-from ..param import Item, Parameter, ItemView, StreamView
+from ..param import (
+    Item
+    , Parameter
+    , ItemView
+    , ItemsView
+    , StreamView
+    )
 from .. import usecase as UC
 from fastapi import status
+from typing import Optional
 
 router = routers.create("/concepts", ["concept"])
 
@@ -23,11 +30,16 @@ async def delete(uid: str):
 
 
 @router.get(""
-    , response_model=list[ItemView])
+    , response_model=ItemsView)
 async def find_by_name_regex(name:str):
     return UC.find_by_name(name)
 
 @router.get("/{uid}"
+    , response_model=ItemView)
+async def find_by_uid(uid:str):
+    return UC.find_by_uid(uid)
+
+@router.get("/{uid}/streams"
     , response_model=StreamView)
 async def find_stream_by_uid(uid:str):
     return UC.find_stream_by_uid(uid)

@@ -59,5 +59,4 @@ def test_api_replace_src(g):
             , json=reconn.dict())
     assert res.status_code == status.HTTP_200_OK
     sv = find_stream_by_uid(uid6)
-    print(sv)
     assert uid8 == sv.sources[0].item.uid

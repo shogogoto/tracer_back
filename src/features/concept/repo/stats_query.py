@@ -9,6 +9,7 @@ from .cypher import (
     , Node
     , PathFactory
     , DictConverter
+    , TargetQuery
     )
 
 from ..param import (
@@ -44,6 +45,12 @@ class WithStatisticsQuery:
         q = PropQuery(Concept)
         q.statistics = stream_statistics(q.matched)
         return q.find("name", value)
+
+    @staticmethod
+    def find_by_uid(uid:str)->Results:
+        q = TargetQuery(Concept)
+        q.statistics = stream_statistics(q.target)
+        return q.find(uid)
 
     @staticmethod
     def find_adjacent_by_uid(uid:str)->tuple[Results,Results]:

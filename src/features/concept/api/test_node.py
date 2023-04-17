@@ -1,3 +1,5 @@
+from pytest import fixture
+from functools import cache
 from fastapi.testclient import TestClient
 from fastapi import FastAPI, status
 from ..param import Parameter, Item
@@ -7,10 +9,16 @@ app = FastAPI()
 app.include_router(router)
 client = TestClient(app)
 
-def test_api_create_concept():
+@fixture
+@cache
+def created_response():
     name  = "test_api_create"
     param = Parameter(name=name)
-    res   = client.post("/concepts", json=param.dict())
+    return client.post("/concepts", json=param.dict())
+
+def test_api_create_concept(created_response):
+    name  = "test_api_create"
+    res   = created_response
     assert res.status_code == status.HTTP_201_CREATED
     assert res.json()["name"] == name
 
@@ -39,3 +47,13 @@ def test_api_delete_concept():
     res = client.delete(f"/concepts/{item.uid}")
     assert res.status_code == status.HTTP_200_OK
     assert res.json() == True
+
+def test_api_get_concept_by_uid(created_response):
+    res = client.get("/concepts/not-found-uid")
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json() is None
+
+    uid = created_response.json()["uid"]
+    res = client.get(f"/concepts/{uid}")
+    assert res.status_code == status.HTTP_200_OK
+    assert created_response.json() == res.json()["item"]

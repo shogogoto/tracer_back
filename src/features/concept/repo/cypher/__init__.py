@@ -1,5 +1,5 @@
 from .graph import NeoDiGraph
-from .facade import RelationQuery, PropQuery
+from .facade import RelationQuery, PropQuery, TargetQuery
 from .statistics import Statistics
 
 from .node import Node

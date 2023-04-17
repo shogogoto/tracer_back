@@ -11,6 +11,7 @@ from .param import (
     , StreamView
     )
 from neomodel import db
+from typing import Optional
 
 
 @db.write_transaction
@@ -76,9 +77,11 @@ def change_infer_destination(
 
 
 @db.read_transaction
-def find_by_name(name:str)->list[ItemView]:
+def find_by_name(name:str)->ItemsView:
     results = WithStatisticsQuery.find_by_name(name)
-    return WithStatisticsQuery.results2model(results)
+    return ItemsView(
+         items=WithStatisticsQuery.results2model(results)
+    )
 
 @db.read_transaction
 def find_sources(uid:str)->ItemsView:
@@ -88,16 +91,25 @@ def find_sources(uid:str)->ItemsView:
     )
 
 @db.read_transaction
-def find_destinations(uid:str)->ItemView:
+def find_destinations(uid:str)->ItemsView:
     results = WithStatisticsQuery.find_destinations(uid)
     return ItemsView(
          items=WithStatisticsQuery.results2model(results)
     )
 
+@db.read_transaction
+def find_by_uid(uid:str)->Optional[ItemView]:
+    results = WithStatisticsQuery.find_by_uid(uid)
+    models = WithStatisticsQuery.results2model(results)
+    if len(models) == 0:
+        return None
+    else:
+        return models[0]
+
 
 @db.read_transaction
 def find_stream_by_uid(uid:str)->StreamView:
-    srcs, dests = WithStatisticsQuery().find_adjacent_by_uid(uid)
+    srcs, dests = WithStatisticsQuery().find_stream_by_uid(uid)
     return StreamView(
         sources=WithStatisticsQuery.results2model(srcs)
         , destinations=WithStatisticsQuery.results2model(dests)
