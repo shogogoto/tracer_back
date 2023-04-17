@@ -34,7 +34,6 @@ def test_create_graph_by_wapped():
 @pytest.fixture
 @cache
 def narrow_tree(): #内向き
-    pass
     tree = nx.balanced_tree(2, 3, nx.DiGraph())
     tree = nx.reverse(tree)
     nx.set_node_attributes(tree, name="name",

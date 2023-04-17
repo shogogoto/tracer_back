@@ -1,17 +1,17 @@
 from __future__ import annotations
 from typing import Hashable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from neomodel import StructuredNode
 import networkx as nx
 
 
-@dataclass(frozen=False)
+@dataclass(frozen=True)
 class NeoDiGraph:
     # StructuredNodeではなく、
     #  uidをもつことを保証するBaseNodeを定義すべきか
     label:StructuredNode
-    G:nx.DiGraph = nx.DiGraph()
+    G:nx.DiGraph = field(default_factory=nx.DiGraph)
 
     def add_node(self, **kwargs)->Hashable:
         l = self.label(**kwargs).save()
