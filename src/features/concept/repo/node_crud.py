@@ -5,6 +5,10 @@ from typing import Optional
 from .. import errors as E
 
 
+def to_model(c:Concept):
+    return Item(**c.__properties__)
+
+
 @dataclass(frozen=True)
 class ConceptCommand:
     item:Item
@@ -14,15 +18,15 @@ class ConceptCommand:
         if UidQuery(i.uid).exists():
             raise E.AlreadyCreatedError(item=i)
         c = Concept.create(i.dict())[0]
-        return Item(**c.__properties__)
+        return to_model(c)
 
-    def update(self, to:Item)->Item:
+    def update(self)->Item:
         c = UidQuery(self.item.uid).find_strict()
-        for k, v in to.dict().items():
+        for k, v in self.item.dict().items():
             if v is not None:
                 setattr(c, k, v)
         s = c.save()
-        return Item(**s.__properties__)
+        return to_model(s)
 
     def delete(self)->bool:
         c = UidQuery(self.item.uid).find_strict()
@@ -38,7 +42,7 @@ class UidQuery:
         if c is None:
             return None
         else:
-            return Item(**c.__properties__)
+            return to_model(c)
 
     def find_strict(self)->Concept:
         c = Concept.nodes.first_or_none(uid=self.uid)

@@ -22,15 +22,14 @@ def test_create_duplicate():
 def test_update():
     item = Item(name="test_pre_update")
     created = Cmd(item).create()
-    up_item = Item(name="test_updated")
-    u = Cmd(created).update(up_item)
+    created.name="test_updated"
+    u = Cmd(created).update()
     assert u == UidQuery(u.uid).find()
 
 def test_update_not_found():
     item = Item(name="test_update_for_not_found")
-    up_item = Item(name="test_updated_for_not_found")
     with pytest.raises(E.NotFoundError) as e:
-        u = Cmd(item).update(up_item)
+        u = Cmd(item).update()
 
 def test_delete():
     item = Item(name="test_delete")
