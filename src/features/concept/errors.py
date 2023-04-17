@@ -27,7 +27,7 @@ class AlreadyCreatedError(DomainError):
 
     @property
     def message(self)->str:
-        return f"This is already exists, {self.item}"
+        return f"This is already exists: {self.item}"
 
 class NotFoundError(DomainError):
     uid:str
@@ -36,7 +36,7 @@ class NotFoundError(DomainError):
 
     @property
     def message(self)->str:
-        return f"This is not exists, {self.uid}"
+        return f"This is not exists: uid={self.uid}"
 
 
 class AlreadyConnectedError(DomainError):
@@ -62,10 +62,3 @@ class NotConnectedError(DomainError):
         return "This is not connected" \
                f"from {self.src_item}" \
                f"to {self.dest_item}"
-
-class SystemError(Exception):
-    pass
-
-
-class DBConnectionRefusedError(SystemError):
-    pass
