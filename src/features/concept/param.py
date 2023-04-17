@@ -30,6 +30,11 @@ class ItemView(BaseModel):
     item:Item
     statistics:StreamStatistics
 
+
+class ItemsView(BaseModel):
+    items:list[ItemView]
+
+
 class StreamView(BaseModel):
     sources:list[ItemView]
     destinations:list[ItemView]

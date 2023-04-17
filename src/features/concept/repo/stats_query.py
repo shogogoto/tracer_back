@@ -56,6 +56,18 @@ class WithStatisticsQuery:
         return srcs, dests
 
     @staticmethod
+    def find_sources(uid:str)->Results:
+        srcQ  = RelationQuery(Concept, "srcs")
+        srcQ.statistics  = stream_statistics(srcQ.matched)
+        return srcQ.find(uid, 1)
+
+    @staticmethod
+    def find_destinations(uid:str)->Results:
+        destQ = RelationQuery(Concept, "dests")
+        destQ.statistics = stream_statistics(destQ.matched)
+        return destQ.find(uid, 1)
+
+    @staticmethod
     def find_stream_by_uid(uid:str)->tuple[Results,Results]:
         srcQ  = RelationQuery(Concept, "srcs")
         destQ = RelationQuery(Concept, "dests")

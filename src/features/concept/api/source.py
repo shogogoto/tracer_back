@@ -1,5 +1,5 @@
 from ...common import routers
-from ..param import Item, Parameter, Reconnection
+from ..param import Item, Parameter, Reconnection, ItemsView
 from .. import usecase as UC
 from fastapi import status
 
@@ -33,3 +33,8 @@ async def replace_source(
     , reconn:Reconnection
 )->bool:
     return UC.change_infer_source(uid, src_uid, reconn.new_uid)
+
+@router.get(""
+    , response_model=ItemsView)
+async def find_sources(uid:str):
+    return UC.find_sources(uid)

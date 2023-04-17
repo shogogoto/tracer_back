@@ -1,5 +1,5 @@
 from ...common import routers
-from ..param import Item, Parameter
+from ..param import Item, Parameter, ItemView, StreamView
 from .. import usecase as UC
 from fastapi import status
 
@@ -20,3 +20,14 @@ async def update(uid:str, param:Parameter):
     , response_model=bool)
 async def delete(uid: str):
     return UC.delete_concept(uid)
+
+
+@router.get(""
+    , response_model=list[ItemView])
+async def find_by_name_regex(name:str):
+    return UC.find_by_name(name)
+
+@router.get("/{uid}"
+    , response_model=StreamView)
+async def find_stream_by_uid(uid:str):
+    return UC.find_stream_by_uid(uid)
