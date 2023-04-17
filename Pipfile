@@ -6,14 +6,16 @@ name = "pypi"
 [packages]
 fastapi = "==0.70.0"
 neomodel = "*"
+networkx = "*"
 
 [dev-packages]
 jedi-language-server = "*"
 neovim = "*"
-pynvim = "*"
 uvicorn = "*"
 pytest = "*"
 pytest-watch = "*"
+requests = "*"
+pynvim = "*"
 
 [requires]
 python_version = "3.9"
@@ -23,4 +25,4 @@ python_full_version = "3.9.16"
 dev  = "uvicorn main:app --reload"
 prod = "uvicorn main:app"
 test = "pytest"
-tw   = "pytest-watch"
+tw   = "pytest-watch -- -v -s --durations=0 --ff"

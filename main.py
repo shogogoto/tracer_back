@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src import features as F
+from src.features.common import routers
+
 
 app = FastAPI()
 
@@ -14,8 +16,11 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(F.concept.api.router)
+# app.include_router(F.concept.api.concept_router)
+
 app.include_router(F.admin.api.router)
+routers.batch_include(app)
+
 
 @app.get("/")
 def read_root():
