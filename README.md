@@ -9,6 +9,12 @@ git clone https://github.com/shogogoto/tracer_back.git
 pipenv sync --dev
 ```
 
+## vimで編集準備
+pipenvの環境に入っておかないとjediの補完が効かない
+```bash
+pipenv shell
+vi ???
+```
 
 # テスト実行
 テスト実行前にデータベースNeo4jを起動する必要がある
